@@ -28,8 +28,7 @@ def make_tmdb_file_dir(category, year, movie_code):
     else:
         return "wrong"
 
-
-def show_TMDB_data(file_key):
+def get_TMDB_data(file_key):
     if file_key == "wrong":
         return "wrong_category"
     else:
@@ -39,7 +38,7 @@ def show_TMDB_data(file_key):
             obj = s3.get_object(Bucket='sms-basket', Key=file_key)
             raw_data = obj['Body'].read()
             json_data = json.loads(raw_data.decode('utf-8'))
-            print(json_data)
+            return json.dumps(json_data)
         except Exception as e:
             print(str(e))
 
