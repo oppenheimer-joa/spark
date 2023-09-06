@@ -87,32 +87,9 @@ def kopis_spark_job(date):
     raw_image_rdd = spark.sparkContext.parallelize(file_list)
     transformed_image_rdd = raw_image_rdd.map(transform_json)
 
-    # 스키마 정의
-    schema = StructType([
-        StructField("mt20id", StringType(), True),
-        StructField("prfnm", StringType(), True),
-        StructField("prfpdfrom", StringType(), True),
-        StructField("prfpdto", StringType(), True),
-        StructField("fcltynm", StringType(), True),
-        StructField("prfcast", StringType(), True),
-        StructField("prfcrew", StringType(), True),
-        StructField("prfruntime", StringType(), True),
-        StructField("prfage", StringType(), True),
-        StructField("entrpsnm", StringType(), True),
-        StructField("pcseguidance", StringType(), True),
-        StructField("poster", StringType(), True),
-        StructField("sty", StringType(), True),
-        StructField("genrenm", StringType(), True),
-        StructField("prfstate", StringType(), True),
-        StructField("openrun", StringType(), True),
-        StructField("styurls", StringType(), True),
-        StructField("mt10id", StringType(), True),
-        StructField("dtguidance", StringType(), True),
-        StructField("tksites", StringType(), True)
-    ])
-
     # 변환된 JSON 데이터 출력
-    json_df = spark.read.schema(schema).json(transformed_image_rdd)
+    json_df = spark.read.json(transformed_image_rdd)
+
     # 데이터프레임 보기
     json_df.show(truncate=3)
 
@@ -121,7 +98,6 @@ def kopis_spark_job(date):
     json_df = json_df.coalesce(1)
     json_df.write.parquet(output_path)
 
-
 date='2023-08-07'
 kopis_spark_job(date)
-# spark.stop()
+spark.stop()
