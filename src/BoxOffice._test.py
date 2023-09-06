@@ -1,8 +1,8 @@
-import findspark
-findspark.init()
-
-import pyspark
-findspark.find()
+# import findspark
+# findspark.init()
+# 
+# import pyspark
+# findspark.find()
 
 # from lib.modules import *
 from modules import *
@@ -13,7 +13,6 @@ import json, os
 
 # Spark session 초기화
 spark = SparkSession.builder \
-    .master("local[*]") \
     .appName("JSON to DF") \
     .getOrCreate()
     
@@ -31,7 +30,7 @@ def load_s3_all_files_in_dir(date):
                 if date == file_date:
                     file_list.append(obj['Key'])
 
-    return file_list
+    return file_list, year
 
 # 파일을 json 형식으로 반환
 def s3_file_to_json(file_path):
@@ -46,9 +45,8 @@ def s3_file_to_json(file_path):
     
     return json_data
 
+# json을 df로 변환, areaCd 컬럼 추가, rank로 행 정렬, 컬럼순서 json 원본대로 정렬
 def json_to_df(file_path, areaCd):
-
-    # 받는 file_path의 형식 정하기
     # file_path = 'kobis/2023/20230903_0105002_boxOffice.json'
     
     json_str = s3_file_to_json(file_path)
@@ -66,6 +64,7 @@ def json_to_df(file_path, areaCd):
 
     return df
 
+# 해당 날짜의 df를 합쳐서 parquet로 로컬 저장해서 s3 업로드
 def df_to_parquet(date):
     schema = StructType([
         StructField("areaCd", StringType(), True),
@@ -90,26 +89,28 @@ def df_to_parquet(date):
     ])
     dataframe = spark.createDataFrame([], schema)
 
-    file_list = load_s3_all_files_in_dir(date)
+    file_list, year = load_s3_all_files_in_dir(date)
     
     # 20230903_boxOffice
     filename = f'{date}_boxOffice'
     
+    # 로컬 저장 경로 - 경로 설정 필요
     local_path = f'/home/kjh/code/SMS/spark/data/{filename}'
     
     for file_path in file_list:
+        # file_path = 'kobis/2023/20230903_0105002_boxOffice.json'
         areaCd = file_path.split("_")[1]
         temp_df = json_to_df(file_path, areaCd)
         dataframe = dataframe.union(temp_df)
         
     dataframe = dataframe.orderBy("areaCd", "rank")
     
-    # Parquet 파일로 저장
-    dataframe.write.parquet(f'file:///home/kjh/code/SMS/spark/data/{filename}')
+    # 로컬 저장 경로 - Parquet 파일로 저장 - 경로 설정 필요
+    dataframe.write.parquet(f'file://{local_path}')
 
-    year = date[:4]
-    # spark/kobis/2023
+    # s3 저장 경로 - spark/kobis/2023 - 경로 설정 필요
     parquet_path = f'spark/kobis/{year}'
+    
     # S3 업로드
     s3 = create_s3client()
     for file in os.listdir(local_path):
@@ -117,6 +118,6 @@ def df_to_parquet(date):
         s3_path = os.path.join(f'{parquet_path}/{filename}', file)
         s3.upload_file(path, 'sms-basket', s3_path)
 
-df_to_parquet('20230904')
-df = spark.read.parquet('file:///home/kjh/code/SMS/spark/data/20230904_boxOffice')
-df.show()
+# df_to_parquet('20230904')
+# df = spark.read.parquet('file:///home/kjh/code/SMS/spark/data/20230904_boxOffice')
+# df.show()
