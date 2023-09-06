@@ -1,10 +1,16 @@
+# from lib.modules import *
+from tmp_lib import *
+from xml_to_dict import XMLtoDict
+import json
+import io
+
 import findspark
 findspark.init()
 
 import pyspark
 findspark.find()
 
-from pyspark.sql import SparkSession, Row
+from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType
 
 conf = pyspark.SparkConf().setAppName('appName').setMaster('local')
@@ -14,12 +20,36 @@ conf.set("spark.sql.parquet.writeLegacyFormat", "true")
 sc = pyspark.SparkContext(conf=conf)
 spark = SparkSession(sc)
 
-import tmp_lib
-import json
 
-date='2023-08-07'
-file_list = tmp_lib.get_raw_data(date)
-# print(len(file_list))
+def get_raw_data(date):
+    year = date.split('-')[0]
+    print(date,year)
+    s3 = create_s3client()
+    paginator = s3.get_paginator('list_objects_v2')
+    page_iterator = paginator.paginate(Bucket='sms-basket',Prefix=f'kopis/{year}')
+
+    file_list = []
+
+    for page in page_iterator : 
+        file_list += [obj['Key'] for obj in page['Contents'] if obj['Key'].find(date)>-1]
+    
+    xml_file_list=[]
+
+    for file in file_list:
+        obj=s3.get_object(Bucket='sms-basket', Key = file)
+
+        result=io.BytesIO(obj['Body'].read())
+        wrapper = io.TextIOWrapper(result, encoding='utf-8')
+        text_xml = wrapper.read()
+
+        parsing_info=XMLtoDict().parse(text_xml)['dbs']['db']
+
+        parsing_json=json.dumps(parsing_info, ensure_ascii=False, indent=2, separators=(',', ': '))
+
+        xml_file_list.append(parsing_json)
+        # xml_file_list.append(str(parsing_info))
+
+    return xml_file_list
 
 def transform_json(json_str):
     data = json.loads(json_str)
@@ -49,42 +79,49 @@ def transform_json(json_str):
 
     return json.dumps(data)
 
-# 데이터를 RDD로 변환
-raw_image_rdd = spark.sparkContext.parallelize(file_list)
-transformed_image_rdd = raw_image_rdd.map(transform_json)
+def kopis_spark_job(date):
 
-# 스키마 정의
-schema = StructType([
-    StructField("mt20id", StringType(), True),
-    StructField("prfnm", StringType(), True),
-    StructField("prfpdfrom", StringType(), True),
-    StructField("prfpdto", StringType(), True),
-    StructField("fcltynm", StringType(), True),
-    StructField("prfcast", StringType(), True),
-    StructField("prfcrew", StringType(), True),
-    StructField("prfruntime", StringType(), True),
-    StructField("prfage", StringType(), True),
-    StructField("entrpsnm", StringType(), True),
-    StructField("pcseguidance", StringType(), True),
-    StructField("poster", StringType(), True),
-    StructField("sty", StringType(), True),
-    StructField("genrenm", StringType(), True),
-    StructField("prfstate", StringType(), True),
-    StructField("openrun", StringType(), True),
-    StructField("styurls", StringType(), True),
-    StructField("mt10id", StringType(), True),
-    StructField("dtguidance", StringType(), True),
-    StructField("tksites", StringType(), True)
-])
+    file_list = get_raw_data(date)
 
-# 변환된 JSON 데이터 출력
-json_df = spark.read.schema(schema).json(transformed_image_rdd)
-# 데이터프레임 보기
-json_df.show(truncate=3)
+    # 데이터를 RDD로 변환
+    raw_image_rdd = spark.sparkContext.parallelize(file_list)
+    transformed_image_rdd = raw_image_rdd.map(transform_json)
 
-# Parquet 파일로 저장
-output_path = f"file:///home/sub/cong/spark/data/KOPIS_{date}.parquet"
-json_df = json_df.coalesce(1)
-json_df.write.parquet(output_path)
+    # 스키마 정의
+    schema = StructType([
+        StructField("mt20id", StringType(), True),
+        StructField("prfnm", StringType(), True),
+        StructField("prfpdfrom", StringType(), True),
+        StructField("prfpdto", StringType(), True),
+        StructField("fcltynm", StringType(), True),
+        StructField("prfcast", StringType(), True),
+        StructField("prfcrew", StringType(), True),
+        StructField("prfruntime", StringType(), True),
+        StructField("prfage", StringType(), True),
+        StructField("entrpsnm", StringType(), True),
+        StructField("pcseguidance", StringType(), True),
+        StructField("poster", StringType(), True),
+        StructField("sty", StringType(), True),
+        StructField("genrenm", StringType(), True),
+        StructField("prfstate", StringType(), True),
+        StructField("openrun", StringType(), True),
+        StructField("styurls", StringType(), True),
+        StructField("mt10id", StringType(), True),
+        StructField("dtguidance", StringType(), True),
+        StructField("tksites", StringType(), True)
+    ])
 
-spark.stop()
+    # 변환된 JSON 데이터 출력
+    json_df = spark.read.schema(schema).json(transformed_image_rdd)
+    # 데이터프레임 보기
+    json_df.show(truncate=3)
+
+    # Parquet 파일로 저장 - s3 로 경로 수정 필요
+    output_path = f"file:///home/sub/cong/spark/data/KOPIS_{date}.parquet"
+    json_df = json_df.coalesce(1)
+    json_df.write.parquet(output_path)
+
+
+date='2023-08-07'
+kopis_spark_job(date)
+# spark.stop()
