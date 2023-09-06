@@ -1,13 +1,12 @@
 from lib.modules import *
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, IntegerType, ArrayType, StringType
 import json
 
 spark = SparkSession.builder.appName("JsonToImageRdd").getOrCreate()
 
 year = '1960-01-01'
 movie_code = '1000336'
-categories = 'image'
+category = 'image'
 
 image_path = make_tmdb_file_dir(category, year, movie_code)
 image_data = get_TMDB_data(image_path)
@@ -31,5 +30,4 @@ def transform_TMDB_image_json(json_data):
 transformed_image_rdd = raw_image_rdd.map(transform_TMDB_image_json)
 
 #API 서버내에 데이터 rdd 데이터 transformed_image_rdd 저장
-
-transformed_image_rdd.saveAsTextFile("file_path")
+transformed_image_rdd.saveAsTextFile(f"/Users/jesse/Documents/sms/spark/image_{year}_{movie_code}")
