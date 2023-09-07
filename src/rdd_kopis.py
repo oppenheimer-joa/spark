@@ -1,27 +1,16 @@
-# from lib.modules import *
-from tmp_lib import *
-from xml_to_dict import XMLtoDict
-import json
+from lib.modules import *
 import io
-
-import findspark
-findspark.init()
-
-import pyspark
-findspark.find()
+import json
+from xml_to_dict import XMLtoDict
+import sys
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, StringType
 
-conf = pyspark.SparkConf().setAppName('appName').setMaster('local')
-conf.set("parquet.enable.summary-metadata", "false")
-conf.set("spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs", "false")
-conf.set("spark.sql.parquet.writeLegacyFormat", "true")
-sc = pyspark.SparkContext(conf=conf)
-spark = SparkSession(sc)
+# Spark Session Build
+spark = SparkSession.builder.getOrCreate('SPARK_KOPIS')
+print("spark session built successfully")
 
-
-def get_raw_data(date):
+def get_raw_from_s3(date):
     year = date.split('-')[0]
     print(date,year)
     s3 = create_s3client()
@@ -30,9 +19,9 @@ def get_raw_data(date):
 
     file_list = []
 
-    for page in page_iterator : 
+    for page in page_iterator :
         file_list += [obj['Key'] for obj in page['Contents'] if obj['Key'].find(date)>-1]
-    
+
     xml_file_list=[]
 
     for file in file_list:
@@ -43,15 +32,15 @@ def get_raw_data(date):
         text_xml = wrapper.read()
 
         parsing_info=XMLtoDict().parse(text_xml)['dbs']['db']
-
         parsing_json=json.dumps(parsing_info, ensure_ascii=False, indent=2, separators=(',', ': '))
-
         xml_file_list.append(parsing_json)
         # xml_file_list.append(str(parsing_info))
 
     return xml_file_list
 
-def transform_json(json_str):
+
+# 내장 함수
+def transform_kopis_json(json_str):
     data = json.loads(json_str)
 
     try :
@@ -79,25 +68,30 @@ def transform_json(json_str):
 
     return json.dumps(data)
 
-def kopis_spark_job(date):
 
-    file_list = get_raw_data(date)
+date = sys.argv[1]
 
-    # 데이터를 RDD로 변환
-    raw_image_rdd = spark.sparkContext.parallelize(file_list)
-    transformed_image_rdd = raw_image_rdd.map(transform_json)
+file_list = get_raw_from_s3(date)
 
-    # 변환된 JSON 데이터 출력
-    json_df = spark.read.json(transformed_image_rdd)
+# 데이터를 RDD로 변환
+raw_rdd = spark.sparkContext.parallelize(file_list)
+transformed_rdd = raw_rdd.map(transform_kopis_json)
 
-    # 데이터프레임 보기
-    json_df.show(truncate=3)
+# 변환된 JSON 데이터 출력
+json_df = spark.read.json(transformed_rdd)
+json_df.show()
 
-    # Parquet 파일로 저장 - s3 로 경로 수정 필요
-    output_path = f"file:///home/sub/cong/spark/data/KOPIS_{date}.parquet"
-    json_df = json_df.coalesce(1)
-    json_df.write.parquet(output_path)
+#json_df = json_df.coalesce(1)
+out_buffer = io.BytesIO()
+pdf = json_df.toPandas()
+pdf.to_parquet(out_buffer)
 
-date='2023-08-07'
-kopis_spark_job(date)
+# Parquet 파일로 로컬에 저장 
+#output_path = f"/home/ubuntu/spark/spark-3.2.4/test/datas/temp_KOPIS_{date}.parquet"
+#json_df.write.parquet(output_path)
+
+s3 =  create_s3client()
+output_path = f'test-spark/KOPIS_{date}.parquet'
+s3.put_object(Bucket='sms-basket', Key = output_path, Body = out_buffer.getvalue())
+
 spark.stop()
