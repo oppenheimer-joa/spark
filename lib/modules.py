@@ -16,15 +16,15 @@ def create_s3client():
 
     return s3
 
-def make_tmdb_file_dir(category, year, movie_code):
+def make_tmdb_file_dir(category, date, movie_code):
     if category == "detail":
-        return f'TMDB/{category}/{year}/TMDB_movieDetails_{movie_code}_{year}.json'
+        return f'TMDB/{category}/{date}/TMDB_movieDetails_{movie_code}_{date}.json'
     elif category == "credit":
-        return f'TMDB/{category}/{year}/TMDB_movieCredits_{movie_code}_{year}.json'
+        return f'TMDB/{category}/{date}/TMDB_movieCredits_{movie_code}_{date}.json'
     elif category == "similar":
-        return f'TMDB/{category}/{year}/TMDB_movieSimilar_{movie_code}_{year}.json'
+        return f'TMDB/{category}/{date}/TMDB_movieSimilar_{movie_code}_{date}.json'
     elif category == "image":
-        return f'TMDB/{category}/{year}/TMDB_movieImages_{movie_code}_{year}.json'
+        return f'TMDB/{category}/{date}/TMDB_movieImages_{movie_code}_{date}.json'
     else:
         return "wrong"
 

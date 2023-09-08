@@ -1,13 +1,28 @@
 from lib.modules import *
-from pyspark import SparkContext
+# from pyspark import SparkContext
 from pyspark.sql import SparkSession, Row
-import json
+import json, sys
 
-sc = SparkContext(appName="transformCannesFilm")
-spark = SparkSession.builder.appName("CannesWinners").getOrCreate()
+# sc = SparkContext(appName="transformCannesFilm")
 
-year = '2022'
-festa_name = 'cannes'
+access = get_config('AWS', 'S3_ACCESS')
+secret = get_config('AWS', 'S3_SECRET')
+
+# Spark session 초기화
+spark = SparkSession.builder \
+    .appName("ImdbCannesWinnersJsonToParquet") \
+    .config("spark.hadoop.fs.s3a.access.key", access) \
+    .config("spark.hadoop.fs.s3a.secret.key", secret) \
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+    .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
+    .getOrCreate()
+
+# year = '2022'
+# festa_name = 'cannes'
+# Airflow 에서 받을 파라미터
+year = sys.argv[1]
+festa_name = sys.argv[2]
+
 cannes_path = make_imdb_file_dir(festa_name, year)
 cannes_data = get_s3_data(cannes_path)
 
@@ -40,5 +55,10 @@ cannes_data_list = transformed_cannes_data.collect()
 
 rdd_rows = [Row(award_name=row[0], winner=row[1], winner_image=row[2]) for row in cannes_data_list]
 cannes_df = spark.createDataFrame(rdd_rows)
+# s3 저장 경로 
+parquet_path = f's3a://sms-warehouse/imdb/{festa_name}/{year}'
+# imdb_academy_1931
+filename = f'imdb_{festa_name}_{year}'
+cannes_df.write.parquet(f'{parquet_path}/{filename}')
 
-cannes_df.show()
+spark.stop()

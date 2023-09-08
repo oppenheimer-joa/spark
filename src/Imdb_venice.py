@@ -1,26 +1,27 @@
 from lib.modules import *
-import json, sys, time
+import json, sys
 from pyspark.sql import SparkSession, Row
 
-
-start_time = time.process_time()
+access = get_config('AWS', 'S3_ACCESS')
+secret = get_config('AWS', 'S3_SECRET')
 
 # Spark session 초기화
 spark = SparkSession.builder \
-    .appName("imdb venice") \
-    .master("local[1]") \
+    .appName("ImdbVeniceWinnersJsonToParquet") \
+    .config("spark.hadoop.fs.s3a.access.key", access) \
+    .config("spark.hadoop.fs.s3a.secret.key", secret) \
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+    .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
     .getOrCreate()
 
-def s3_file_to_json(file_path):
+# year = '2022'
+# festa_name = 'venice'
+# Airflow 에서 받을 파라미터
+year = sys.argv[1]
+festa_name = sys.argv[2]
 
-    s3 = create_s3client()
-
-    s3_object = s3.get_object(Bucket='sms-basket', Key=file_path)
-
-    raw_data = s3_object['Body'].read()
-    json_str = raw_data.decode('utf-8')
-
-    return json_str
+venice_path = make_imdb_file_dir(festa_name, year)
+venice_data = get_s3_data(venice_path)
 
 # 1961~1968 & 1980~2015 Golden Lion
 def process_imdb_venice1(json_str):
@@ -54,16 +55,17 @@ def process_imdb_venice1(json_str):
     return final_data
     # print(final_data)
 
-
-
-year = "2022"
-imdb_data = s3_file_to_json(f"IMDb/imdb_venice_{year}.json")
-
 # 데이터를 RDD로 변환
-raw_imdb_rdd = spark.sparkContext.parallelize([imdb_data])
+raw_imdb_rdd = spark.sparkContext.parallelize([venice_data])
 transformed_rdd = raw_imdb_rdd.map(process_imdb_venice1)
 tmp_rdd = transformed_rdd.collect()[0]
 rdd_rows = [Row(award_name=row[0], award_category=row[1],award_winner=row[2], award_image=row[3]) for row in tmp_rdd]
 
-df = spark.createDataFrame(rdd_rows)
-df.show()
+venice_df = spark.createDataFrame(rdd_rows)
+# s3 저장 경로 
+parquet_path = f's3a://sms-warehouse/imdb/{festa_name}/{year}'
+# imdb_academy_1931
+filename = f'imdb_{festa_name}_{year}'
+venice_df.write.parquet(f'{parquet_path}/{filename}')
+
+spark.stop()

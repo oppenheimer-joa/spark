@@ -1,6 +1,6 @@
 from lib.modules import *
 from pyspark.sql import SparkSession
-import json
+import json, sys
 
 access = get_config('AWS', 'S3_ACCESS')
 secret = get_config('AWS', 'S3_SECRET')
@@ -14,11 +14,15 @@ spark = SparkSession.builder \
     .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
     .getOrCreate()
 
-year = '1960-01-01'
-movie_code = '1000336'
-category = 'credit'
+# date = '1960-01-01'
+# movie_code = '1000336'
+# category = 'credit'
+# Airflow 에서 받을 파라미터
+date = sys.argv[1]
+movie_code = sys.argv[2]
+category = sys.argv[3]
 
-credit_path = make_tmdb_file_dir(category, year, movie_code)
+credit_path = make_tmdb_file_dir(category, date, movie_code)
 credit_data = get_TMDB_data(credit_path)
 
 raw_credit_rdd = spark.sparkContext.parallelize([credit_data])
@@ -57,5 +61,7 @@ def transform_TMDB_credit_json(json_data):
 
 transformed_credit_rdd = raw_credit_rdd.map(transform_TMDB_credit_json)
 
-#API 서버내에 데이터 rdd 데이터 transformed__rdd 저장
-transformed_credit_rdd.saveAsTextFile(f"/Users/jesse/Documents/sms/spark/credit_{year}_{movie_code}")
+# S3에 rdd 데이터 transformed__rdd 저장
+s3_path = f's3a://sms-warehouse/temp'
+filename = f'credit_{date}_{movie_code}'
+transformed_credit_rdd.saveAsTextFile(f"{s3_path}/{filename}")
