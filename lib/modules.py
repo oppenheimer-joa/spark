@@ -42,4 +42,28 @@ def get_TMDB_data(file_key):
         except Exception as e:
             print(str(e))
 
+def make_imdb_file_dir(festa_name, year):
+	if festa_name == "academy":
+		return f'IMDb/imdb_{festa_name}_{year}.json'
+	elif festa_name == "busan":
+		return f'IMDb/imdb_{festa_name}_{year}.json'
+	elif festa_name == "cannes":
+		return f'IMDb/imdb_{festa_name}_{year}.json'
+	elif festa_name == "venice":
+		return f'IMDb/imdb_{festa_name}_{year}.json'
+	else:
+		return "wrong"
 
+def get_s3_data(file_key):
+	if file_key == "wrong":
+		return "wrong_category"
+	else:
+		s3 = create_s3client()
+
+	try:
+		obj = s3.get_object(Bucket='sms-basket', Key=file_key)
+		raw_data = obj['Body'].read()
+		json_data = json.loads(raw_data.decode('utf-8'))
+		return json.dumps(json_data)
+	except Exception as e:
+		print(str(e))
