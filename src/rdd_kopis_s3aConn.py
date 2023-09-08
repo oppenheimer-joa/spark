@@ -23,17 +23,16 @@ print("spark session built successfully")
 def get_raw_data(date):
     year = date.split('-')[0]
 
-    # date를 포함하는 xml 파일 읽기
+    # date를 포함하는 파일 검색 → (파일 경로, 파일 내용) 튜플 형태로 저장한 RDD 반환
     file_list = spark.sparkContext.wholeTextFiles(f"s3a://sms-basket/kopis/{year}/*{date}*.xml")
 
     parsing_list = []
 
-    # xml -> json string
-    for row in file_list.collect():
-        xml_string = row[1]
+    # xml -> dictionary -> JSON 형식의 문자열 변환
+    for row in file_list.collect(): # collect() : 튜플들이 로컬 컴퓨터의 메모리로 수집
+        xml_string = row[1] # 파일 내용 가져오기
         parsing_info=XMLtoDict().parse(xml_string)['dbs']['db']
         parsing_json=json.dumps(parsing_info, ensure_ascii=False, indent=2, separators=(',', ': '))
-        print(parsing_json)
         parsing_list.append(parsing_json)
 
     return parsing_list
@@ -64,25 +63,27 @@ def transform_json(json_str):
 
     data['styurls'] = styurl
     data['tksites'] = tksite_pro
-    print(data)
 
     return json.dumps(data)
 
 # spark job
+def spark_job_kopis(date):
 
+    file_list = get_raw_data(date)
+
+    # 데이터를 RDD로 변환
+    raw_rdd = spark.sparkContext.parallelize(file_list)
+    transformed_rdd = raw_rdd.map(transform_json)
+
+    # 변환된 JSON 데이터 출력
+    json_df = spark.read.json(transformed_rdd)
+    json_df.show()
+
+    # 데이터 프레임을 Parquet 파일로 저장
+    output_path = f'sms-basket/test-spark/KOPIS_{date}.parquet'
+    json_df.write.parquet(f"s3a://{output_path}")
+
+# Execute
 date = sys.argv[1]
-file_list = get_raw_data(date)
-
-# 데이터를 RDD로 변환
-raw_rdd = spark.sparkContext.parallelize(file_list)
-transformed_rdd = raw_rdd.map(transform_json)
-
-# 변환된 JSON 데이터 출력
-json_df = spark.read.json(transformed_rdd)
-json_df.show()
-
-# 데이터 프레임을 Parquet 파일로 저장
-output_path = f'sms-basket/test-spark/KOPIS_{date}.parquet'
-json_df.write.parquet(f"s3a://{output_path}")
-
+spark_job_kopis(date)
 spark.stop()
