@@ -39,6 +39,7 @@ def load_s3_all_files_in_dir(date):
 
     return file_list, year
 
+# s3 json 데이터를 spark dataframe으로 변환 및 가공
 def create_df(file_path, areaCd):
     s3 = create_s3client()
 
@@ -60,7 +61,7 @@ def create_df(file_path, areaCd):
 
     return df
 
-# 해당 날짜의 df를 합쳐서 parquet로 로컬 저장해서 s3 업로드
+# 해당 날짜의 df를 합쳐서 parquet로 s3 업로드
 def df_to_parquet(date):
     schema = StructType([
         StructField("areaCd", StringType(), True),
@@ -87,9 +88,6 @@ def df_to_parquet(date):
 
     file_list, year = load_s3_all_files_in_dir(date)
 
-    # 20230903_boxOffice
-    filename = f'{date}_boxOffice'
-
     for file_path in file_list:
         # file_path = 'kobis/2023/20230903_0105002_boxOffice.json'
         areaCd = file_path.split("_")[1]
@@ -100,6 +98,8 @@ def df_to_parquet(date):
 
     # s3 저장 경로 - spark/kobis/2023 - 경로 설정 필요
     parquet_path = f's3a://sms-basket/spark/kobis/{year}'
+    # 20230903_boxOffice
+    filename = f'{date}_boxOffice'
     dataframe.write.parquet(f'{parquet_path}/{filename}')
 
 
