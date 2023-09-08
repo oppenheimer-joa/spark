@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark import SparkContext
 import json
 
-sc = SparkContext(appName="LoadTempFiles")
+sc = SparkContext(appName="TmdbLoadTempFiles")
 spark = SparkSession(sc)
 
 year = '1960-01-01'

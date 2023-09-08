@@ -1,22 +1,15 @@
-#import findspark
-#findspark.init()
-
-#import pyspark
-#findspark.find()
-
-# from lib.modules import *
-from modules import *
+from lib.modules import *
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit
 from pyspark.sql.types import IntegerType, StructType, StructField, StringType
-import json
+import json, sys
 
 access = get_config('AWS', 'S3_ACCESS')
 secret = get_config('AWS', 'S3_SECRET')
-#.config("spark.hadoop.fs.s3a.multiobjectdelete.enable", "false") \
+
 # Spark session 초기화
 spark = SparkSession.builder \
-    .appName("JSON to DF") \
+    .appName("BoxOfficeJsonToParquet") \
     .config("spark.hadoop.fs.s3a.access.key", access) \
     .config("spark.hadoop.fs.s3a.secret.key", secret) \
     .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
@@ -62,7 +55,7 @@ def create_df(file_path, areaCd):
     return df
 
 # 해당 날짜의 df를 합쳐서 parquet로 s3 업로드
-def df_to_parquet(date):
+def spark_job_boxoffice(date):
     schema = StructType([
         StructField("areaCd", StringType(), True),
         StructField("rnum", StringType(), True),
@@ -97,17 +90,12 @@ def df_to_parquet(date):
     dataframe = dataframe.orderBy("areaCd", "rank")
 
     # s3 저장 경로 - spark/kobis/2023 - 경로 설정 필요
-    parquet_path = f's3a://sms-basket/spark/kobis/{year}'
+    parquet_path = f's3a://sms-warehouse/kobis/{year}'
     # 20230903_boxOffice
     filename = f'{date}_boxOffice'
     dataframe.write.parquet(f'{parquet_path}/{filename}')
 
-
-df_to_parquet('20230904')
-
-# S3에서 Parquet 파일 읽기
-input_path = "s3a://sms-basket/spark/kobis/2023/20230904_boxOffice/"
-df = spark.read.parquet(input_path)
-
-# 데이터 프레임 내용 출력
-df.show()
+# Execute
+date = sys.argv[1]
+spark_job_boxoffice(date)
+spark.stop()

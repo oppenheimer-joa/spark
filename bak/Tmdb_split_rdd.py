@@ -3,8 +3,18 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, IntegerType, ArrayType, StringType
 import json
 
-spark = SparkSession.builder.appName("JsonToDataFrame").getOrCreate()
+access = get_config('AWS', 'S3_ACCESS')
+secret = get_config('AWS', 'S3_SECRET')
 
+# Spark session 초기화
+spark = SparkSession.builder \
+    .appName("TmdbJsonToDataFrame") \
+    .config("spark.hadoop.fs.s3a.access.key", access) \
+    .config("spark.hadoop.fs.s3a.secret.key", secret) \
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+    .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
+    .getOrCreate()
+    
 # api query endpoint로 부터 전달받아야할 것 year, movie_code
 year = '1960-01-01'
 movie_code = '1000336'
@@ -179,6 +189,7 @@ image_df = spark.createDataFrame(transformed_image_rdd, schema=image_schema)
 result_df = credit_df.join(image_df, on='id', how='inner')\
     .join(detail_df, on='id', how='inner')\
     .join(similar_df, on='id', how='inner')
+
 
 #로컬 parquet 다운 테스트
 #result_df.write.parquet(f"/Users/jesse/Documents/sms/spark/{year}_{movie_code}.parquet")

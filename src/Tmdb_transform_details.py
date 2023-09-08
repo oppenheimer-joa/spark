@@ -2,7 +2,17 @@ from lib.modules import *
 from pyspark.sql import SparkSession
 import json
 
-spark = SparkSession.builder.appName("JsonToDetailRdd").getOrCreate()
+access = get_config('AWS', 'S3_ACCESS')
+secret = get_config('AWS', 'S3_SECRET')
+
+# Spark session 초기화
+spark = SparkSession.builder \
+    .appName("TmdbJsonToDetailRdd") \
+    .config("spark.hadoop.fs.s3a.access.key", access) \
+    .config("spark.hadoop.fs.s3a.secret.key", secret) \
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+    .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
+    .getOrCreate()
 
 year = '1960-01-01'
 movie_code = '1000336'

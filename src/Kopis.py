@@ -10,12 +10,11 @@ secret = get_config('AWS', 'S3_SECRET')
 
 # Spark session 초기화
 spark = SparkSession.builder \
-    .appName("KOPIS to DF") \
+    .appName("KopisXmlToParquet") \
     .config("spark.hadoop.fs.s3a.access.key", access) \
     .config("spark.hadoop.fs.s3a.secret.key", secret) \
     .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
     .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
-    .config("spark.hadoop.fs.s3a.multiobjectdelete.enable", "false") \
     .getOrCreate()
 
 print("spark session built successfully")
