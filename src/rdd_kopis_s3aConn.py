@@ -23,12 +23,12 @@ print("spark session built successfully")
 def get_raw_data(date):
     year = date.split('-')[0]
 
-    # 파일명에 "example"을 포함하는 Parquet 파일을 읽음
-    file_list =  spark.read.text(f"s3a://sms-basket/kopis/{year}/*{date}*.xml")
+    # date를 포함하는 xml 파일 읽기
     file_list = spark.sparkContext.wholeTextFiles(f"s3a://sms-basket/kopis/{year}/*{date}*.xml")
 
     parsing_list = []
 
+    # xml -> json string
     for row in file_list.collect():
         xml_string = row[1]
         parsing_info=XMLtoDict().parse(xml_string)['dbs']['db']
@@ -38,7 +38,7 @@ def get_raw_data(date):
 
     return parsing_list
 
-# 내장 함수
+# 데이터 전처리
 def transform_json(json_str):
     data = json.loads(json_str)
 
