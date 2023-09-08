@@ -1,20 +1,13 @@
-from pyspark import SparkContext
 from pyspark.sql import SparkSession
 
-# SparkContext 초기화
-sc = SparkContext(appName="TextFileExample")
+spark = SparkSession.builder.appName("test").\
+    config("spark.hadoop.fs.s3a.access.key", "AKIA54TZQARETLAG2EWQ") \
+    .config("spark.hadoop.fs.s3a.secret.key", "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") \
+    .getOrCreate()
 
-# SparkSession 초기화
-spark = SparkSession(sc)
+s3_path = "s3a://sms-basket/TMDB/credit/1960-01-01/TMDB_movieCredits_1000336_1960-01-01.json"
 
-# 저장된 폴더 경로 설정
-folder_path = "/Users/jesse/Documents/sms/spark/1960-01-01_1000336"
+json_df = spark.read.json(s3_path)
 
-# 폴더로부터 RDD를 불러오기
-rdd = sc.textFile(folder_path)
-
-# RDD를 출력
-rdd.foreach(print)
-
-# SparkContext 종료
-sc.stop()
+json_df.show()
+spark.stop()

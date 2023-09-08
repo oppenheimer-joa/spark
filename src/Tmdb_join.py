@@ -14,6 +14,7 @@ def load_tmp_tmdb_data(folder_path):
 	tmp_rdd = sc.textFile(folder_path)
 	return tmp_rdd.collect()
 
+# rdd -> df
 def convert_df_temp_data(json_data):
 	print(json_data)
 	print(type(json_data))
@@ -37,13 +38,13 @@ result_df = credit_df.join(image_df, on='id', how='inner')\
     .join(similar_df, on='id', how='inner')
 
 result_df.show()
-
+'''
 
 image_df.show()
 similar_df.show()
 detail_df.show()
 credit_df.show()
-'''
+
 
 
 

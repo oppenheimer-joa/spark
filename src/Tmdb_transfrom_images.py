@@ -12,6 +12,7 @@ image_path = make_tmdb_file_dir(category, year, movie_code)
 image_data = get_TMDB_data(image_path)
 
 raw_image_rdd = spark.sparkContext.parallelize([image_data])
+raw_image_rdd.foreach(print)
 
 #image 전처리 함수
 def transform_TMDB_image_json(json_data):
