@@ -2,9 +2,7 @@ from pyspark.sql import SparkSession
 import json
 from xml_to_dict import XMLtoDict
 import sys
-# 아니 왜 lib 디렉토리의 모듈이 안 불러와지는 거임????
-# from lib.modules import *
-from modules import *
+from lib.modules import *
 # Spark Session Build
 
 access = get_config('AWS', 'S3_ACCESS')
