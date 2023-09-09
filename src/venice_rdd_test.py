@@ -3,13 +3,15 @@ import json, sys, time
 from pyspark.sql import SparkSession, Row
 
 
-start_time = time.process_time()
+
 
 # Spark session 초기화
 spark = SparkSession.builder \
     .appName("imdb venice") \
     .master("local[1]") \
     .getOrCreate()
+
+start_time = time.process_time()
 
 def s3_file_to_json(file_path):
 
@@ -67,3 +69,7 @@ rdd_rows = [Row(award_name=row[0], award_category=row[1],award_winner=row[2], aw
 
 df = spark.createDataFrame(rdd_rows)
 df.show()
+
+end_time = time.process_time()
+elapsed_time = end_time - start_time
+print(f"프로세스 시간: {elapsed_time} 초")

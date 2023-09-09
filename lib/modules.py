@@ -2,7 +2,7 @@ import configparser, mysql.connector, boto3,json
 
 def get_config(group, req_var):
 	config = configparser.ConfigParser()
-	config.read('/Users/jesse/Documents/sms/spark/config/config.ini')
+	config.read('/Users/woorek/Documents/sms/spark/config/config.ini')
 	result = config.get(group, req_var)
 
 	return result
