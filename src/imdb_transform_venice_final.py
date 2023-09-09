@@ -31,10 +31,14 @@ def transform_academy(json_str):
         award_Name = i["awardName"]
         for cate in i["categories"]:
             for nomi in cate["nominations"]:
-                if nomi["isWinner"] is True:
+                if nomi["isWinner"] is True :
                     award_Category = nomi["categoryName"]
-                    award_Winner = nomi["primaryNominees"][0]["name"]
-                    award_Image = nomi["primaryNominees"][0]["imageUrl"]
+
+                    if len(nomi["primaryNominees"]) != 0 :
+                        award_Winner = nomi["primaryNominees"][0]["name"]
+                        award_Image = nomi["primaryNominees"][0]["imageUrl"]
+                    else:
+                        pass
 
                     period_tuple = (award_Name, award_Category, award_Winner, award_Image)
                     final_data.append(period_tuple)

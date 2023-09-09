@@ -33,17 +33,21 @@ def transform_academy(json_str):
             for nomi in cate["nominations"]:
                 if nomi["isWinner"] is True:
                     award_Category = nomi["categoryName"]
-                    award_Winner = nomi["primaryNominees"][0]["name"]
-                    award_Image = nomi["primaryNominees"][0]["imageUrl"]
+
+                    if len(nomi["primaryNominees"]) != 0:
+                        award_Winner = nomi["primaryNominees"][0]["name"]
+                        award_Image = nomi["primaryNominees"][0]["imageUrl"]
+                    else:
+                        pass
 
                     period_tuple = (award_Name, award_Category, award_Winner, award_Image)
                     final_data.append(period_tuple)
-                else :
+                else:
                     pass
 
     return final_data
 
-year = "2022"
+year = "2005"
 festa = "academy"
 imdb_data = s3_file_to_json(f"IMDb/imdb_{festa}_{year}.json")
 
