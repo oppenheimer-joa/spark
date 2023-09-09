@@ -17,11 +17,10 @@ spark = SparkSession.builder \
 
 # date = '1960-01-01'
 # movie_code = '1000336'
-# category = 'credit'
 # Airflow 에서 받을 파라미터
 date = sys.argv[1]
 movie_code = sys.argv[2]
-category = sys.argv[3]
+category = 'similar'
 
 similar_path = make_tmdb_file_dir(category, date, movie_code)
 similar_data = get_TMDB_data(similar_path)

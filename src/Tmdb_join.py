@@ -22,7 +22,6 @@ spark = SparkSession(sc)
 
 # date = '1960-01-01'
 # movie_code = '1000336'
-# categories = ['image','detail', 'credit', 'similar']
 # Airflow 에서 받을 파라미터
 date = sys.argv[1]
 movie_code = sys.argv[2]

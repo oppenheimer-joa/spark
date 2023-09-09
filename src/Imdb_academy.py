@@ -16,10 +16,9 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 # year = '2022'
-# festa_name = 'venice'
 # Airflow 에서 받을 파라미터
 year = sys.argv[1]
-festa_name = sys.argv[2]
+festa_name = 'academy'
 
 academy_path = make_imdb_file_dir(festa_name, year)
 academy_data = get_s3_data(academy_path)
