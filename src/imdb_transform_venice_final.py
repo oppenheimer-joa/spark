@@ -21,7 +21,7 @@ def s3_file_to_json(file_path):
     return json_str
 
 
-def transform_academy(json_str):
+def transform_venice(json_str):
     json_obj = json.loads(json_str)
     venice_awards_list = json_obj["nomineesWidgetModel"]["eventEditionSummary"]["awards"]
 
@@ -53,7 +53,7 @@ imdb_data = s3_file_to_json(f"IMDb/imdb_{festa}_{year}.json")
 
 # 데이터를 RDD로 변환
 raw_imdb_rdd = spark.sparkContext.parallelize([imdb_data])
-transformed_rdd = raw_imdb_rdd.map(transform_academy)
+transformed_rdd = raw_imdb_rdd.map(transform_venice)
 tmp_rdd = transformed_rdd.collect()[0]
 rdd_rows = [Row(award_name=row[0], award_category=row[1],award_winner=row[2], award_image=row[3]) for row in tmp_rdd]
 
