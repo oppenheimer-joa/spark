@@ -7,7 +7,7 @@ secret = get_config('AWS', 'S3_SECRET')
 
 # Spark session 초기화
 spark = SparkSession.builder \
-    .appName("ImdbVeniceWinnersJsonToParquet") \
+    .appName("ImdbAcademyWinnersJsonToParquet") \
     .config("spark.hadoop.fs.s3a.access.key", access) \
     .config("spark.hadoop.fs.s3a.secret.key", secret) \
     .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
@@ -30,7 +30,7 @@ tmp_rdd = transformed_rdd.collect()[0]
 rdd_rows = [Row(award_name=row[0], award_category=row[1],award_winner=row[2], award_image=row[3]) for row in tmp_rdd]
 
 venice_df = spark.createDataFrame(rdd_rows)
-# s3 저장 경로 
+# s3 저장 경로
 parquet_path = f's3a://sms-warehouse/imdb/{festa_name}/{year}'
 # imdb_academy_1931
 filename = f'imdb_{festa_name}_{year}'
