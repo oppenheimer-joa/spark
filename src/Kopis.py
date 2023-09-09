@@ -1,8 +1,9 @@
-from pyspark.sql import SparkSession
-import json
-from xml_to_dict import XMLtoDict
-import sys
+import json, sys
+sys.path.append('/home/ubuntu/sms/test')
 from lib.modules import *
+from pyspark.sql import SparkSession
+from xml_to_dict import XMLtoDict
+
 # Spark Session Build
 
 access = get_config('AWS', 'S3_ACCESS')

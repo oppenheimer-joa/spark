@@ -1,7 +1,9 @@
+import json, sys
+sys.path.append('/home/ubuntu/sms/test')
 from lib.modules import *
 # from pyspark import SparkContext
 from pyspark.sql import SparkSession, Row
-import json, sys
+
 
 # sc = SparkContext(appName="transformCannesFilm")
 
