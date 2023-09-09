@@ -1,4 +1,6 @@
-from lib.modules import *
+# 아니 왜 lib 디렉토리의 모듈이 안 불러와지는 거임????
+# from lib.modules import *
+from modules import *
 import json, sys
 from pyspark.sql import SparkSession, Row
 

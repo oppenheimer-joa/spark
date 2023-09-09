@@ -1,4 +1,6 @@
-from lib.modules import *
+# 아니 왜 lib 디렉토리의 모듈이 안 불러와지는 거임????
+# from lib.modules import *
+from modules import *
 from pyspark.sql import SparkSession
 from pyspark import SparkConf, SparkContext
 import json, sys
@@ -25,7 +27,7 @@ spark = SparkSession(sc)
 # Airflow 에서 받을 파라미터
 date = sys.argv[1]
 movie_code = sys.argv[2]
-categories = ['image','detail', 'credit', 'similar']
+categories = ['image', 'detail', 'credit', 'similar']
 
 # 폴더 패스 들어오면 해당 rdd를 받아 반환
 def load_tmp_tmdb_data(folder_path):

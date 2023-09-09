@@ -1,4 +1,6 @@
-from lib.modules import *
+# 아니 왜 lib 디렉토리의 모듈이 안 불러와지는 거임????
+# from lib.modules import *
+from modules import *
 import json, sys
 from pyspark.sql import SparkSession, Row
 
@@ -20,11 +22,11 @@ spark = SparkSession.builder \
 year = sys.argv[1]
 festa_name = sys.argv[2]
 
-venice_path = make_imdb_file_dir(festa_name, year)
-venice_data = get_s3_data(venice_path)
+academy_path = make_imdb_file_dir(festa_name, year)
+academy_data = get_s3_data(academy_path)
 
 # 데이터를 RDD로 변환
-raw_imdb_rdd = spark.sparkContext.parallelize([venice_data])
+raw_imdb_rdd = spark.sparkContext.parallelize([academy_data])
 transformed_rdd = raw_imdb_rdd.map(transform_imdb)
 tmp_rdd = transformed_rdd.collect()[0]
 rdd_rows = [Row(award_name=row[0], award_category=row[1],award_winner=row[2], award_image=row[3]) for row in tmp_rdd]
