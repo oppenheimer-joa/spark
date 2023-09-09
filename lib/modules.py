@@ -68,3 +68,29 @@ def get_s3_data(file_key):
 		return json.dumps(json_data)
 	except Exception as e:
 		print(str(e))
+
+def transform_imdb(json_str):
+	json_obj = json.loads(json_str)
+	venice_awards_list = json_obj["nomineesWidgetModel"]["eventEditionSummary"]["awards"]
+
+	final_data = []
+
+	for i in venice_awards_list:
+		award_Name = i["awardName"]
+		for cate in i["categories"]:
+			for nomi in cate["nominations"]:
+				if nomi["isWinner"] is True :
+					award_Category = nomi["categoryName"]
+
+					if len(nomi["primaryNominees"]) != 0 :
+						award_Winner = nomi["primaryNominees"][0]["name"]
+						award_Image = nomi["primaryNominees"][0]["imageUrl"]
+					else:
+						pass
+
+					period_tuple = (award_Name, award_Category, award_Winner, award_Image)
+					final_data.append(period_tuple)
+				else :
+					pass
+
+	return final_data
