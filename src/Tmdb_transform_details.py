@@ -51,5 +51,5 @@ transformed_detail_rdd = raw_detail_rdd.map(transform_TMDB_detail_json)
 
 # S3에 rdd 데이터 transformed__rdd 저장
 s3_path = f's3a://sms-warehouse/temp'
-filename = f'detail_{date}_{movie_code}`'
+filename = f'detail_{date}_{movie_code}'
 transformed_detail_rdd.saveAsTextFile(f"{s3_path}/{filename}")
