@@ -62,7 +62,7 @@ def transform_json(json_str):
         styurl=[]
 
     data['styurls'] = styurl
-    data['tksites'] = tksite_pro
+    data['tksites'] = str(tksite_pro)
 
     return json.dumps(data)
 
