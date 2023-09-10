@@ -16,6 +16,7 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 # year = '2022'
+# festa_name = 'academy'
 # Airflow 에서 받을 파라미터
 year = sys.argv[1]
 festa_name = sys.argv[2]
