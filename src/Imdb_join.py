@@ -28,7 +28,7 @@ df = spark.read.option("header", "true").parquet(s3_path + "/*/*/*/*.parquet")
 # df.show()
 
 # 데이터프레임 저장
-df.coalesce(1).write.mode("overwrite").format("parquet").partitionBy("year").save(s3_whole_path)
+df.coalesce(1).write.mode("overwrite").format("parquet").partitionBy("festa_name").save(s3_whole_path)
 
 # SparkSession 종료
 spark.stop()
