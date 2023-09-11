@@ -57,10 +57,14 @@ tmp_rdd = transformed_rdd.collect()[0]
 rdd_rows = [Row(year=row[0] ,award_name=row[1], award_category=row[2],award_winner=row[3], award_image=row[4]) for row in tmp_rdd]
 
 festa_df = spark.createDataFrame(rdd_rows)
+csv_path = f's3a://sms-warehouse/imdb/{festa_name}/{year}'
+filename = f'imdb_{festa_name}_{year}'
+festa_df.coalesce(1).write.format("com.databricks.spark.csv").option("header","true").save(f'{csv_path}/{filename}')
+'''
 # s3 저장 경로
 parquet_path = f's3a://sms-warehouse/imdb/{festa_name}/{year}'
 # imdb_academy_1931
 filename = f'imdb_{festa_name}_{year}'
 festa_df.write.parquet(f'{parquet_path}/{filename}')
-
+'''
 spark.stop()
