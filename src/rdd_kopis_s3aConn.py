@@ -71,7 +71,7 @@ def spark_job_kopis(date):
 
     file_list = get_raw_data(date)
 
-    # 데이터를 RDD로 변환
+    # 데이터를 RDD로 변환 → 분산처리
     raw_rdd = spark.sparkContext.parallelize(file_list)
     transformed_rdd = raw_rdd.map(transform_json)
 
