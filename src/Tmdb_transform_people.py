@@ -27,13 +27,25 @@ people_path = make_tmdb_file_dir(category, date, code)
 people_data = get_TMDB_data(people_path)
 
 raw_people_rdd = spark.sparkContext.parallelize([people_data])
-raw_people_rdd.foreach(print)
 
-#similar 전처리 함수
+#people 전처리 함수
+def transform_TMDB_people_json(json_data):
+    try:
+        result = []
+        data = json.loads(json_data)
+        people_name = data.get("name","")
+        people_role = data.get("known_for_department","")
+        result.append((people_name, people_role))
+        return result
+    except json.JSONDecodeError as e:
+        return (f"json decode err : {e}")
+
+
+transformed_people_rdd = raw_people_rdd.map(transform_TMDB_people_json)
+
+transformed_people_rdd.foreach(print)
 
 '''
-transformed_similar_rdd = raw_similar_rdd.map(transform_TMDB_similar_json)
-
 # S3에 rdd 데이터 transformed__rdd 저장
 
 s3_path = f's3a://sms-warehouse/temp'

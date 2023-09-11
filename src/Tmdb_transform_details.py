@@ -18,8 +18,11 @@ spark = SparkSession.builder \
 # date = '1960-01-01'
 # movie_code = '1000336'
 # Airflow 에서 받을 파라미터
-date = sys.argv[1]
-movie_code = sys.argv[2]
+#date = sys.argv[1]
+#movie_code = sys.argv[2]
+
+date = '1960-01-01'
+movie_code = '1000336'
 category = 'detail'
 
 detail_path = make_tmdb_file_dir(category, date, movie_code)
@@ -48,5 +51,5 @@ transformed_detail_rdd = raw_detail_rdd.map(transform_TMDB_detail_json)
 
 # S3에 rdd 데이터 transformed__rdd 저장
 s3_path = f's3a://sms-warehouse/temp'
-filename = f'detail_{date}_{movie_code}'
+filename = f'detail_{date}_{movie_code}`'
 transformed_detail_rdd.saveAsTextFile(f"{s3_path}/{filename}")
