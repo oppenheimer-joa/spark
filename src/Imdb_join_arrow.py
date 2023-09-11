@@ -30,7 +30,9 @@ pandas_df = df.toPandas()
 
 # Pandas DataFrame을 Arrow 형식으로 저장하기 전에 festa_name 열을 기준으로 파티션
 table = pa.Table.from_pandas(pandas_df)
-pq.write_to_dataset(table, root_path=s3_whole_path_arrow, partition_cols=['festa_name'], compression='snappy', use_dictionary=True)
+# 데이터를 저장할 때 디렉토리 구조를 반영하여 객체 키를 설정
+partitioned_s3_whole_path_arrow = s3_whole_path_arrow + pandas_df['festa_name'] + '/'
+pq.write_to_dataset(table, root_path=partitioned_s3_whole_path_arrow, partition_cols=['festa_name'], compression='snappy', use_dictionary=True)
 
 # SparkSession 종료
 spark.stop()
