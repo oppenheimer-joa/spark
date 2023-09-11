@@ -37,7 +37,7 @@ def transform_TMDB_image_json(json_data):
             poster_file_path = posters[0].get("file_path", "")
             data["posters"] = poster_file_path
             
-        return data
+        return json.dumps(data)
 
     except json.JSONDecodeError as e:
         return f"JSON decoding error: {e}"
