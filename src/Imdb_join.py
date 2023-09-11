@@ -1,7 +1,8 @@
+import sys
+sys.path.append('/home/ubuntu/sms/test')
 from lib.modules import *
 from pyspark.sql import SparkSession, Row
-from pyspark.sql.functions import input_file_name
-import os
+
 
 access = get_config('AWS', 'S3_ACCESS')
 secret = get_config('AWS', 'S3_SECRET')
