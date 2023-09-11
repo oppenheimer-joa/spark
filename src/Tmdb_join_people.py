@@ -3,7 +3,7 @@ sys.path.append('/home/ubuntu/sms/test')
 from lib.modules import *
 from pyspark.sql import SparkSession
 from pyspark import SparkConf, SparkContext
-from pyspark.sql.functions import to_date
+from pyspark.sql.functions import to_date, year 
 from pyspark.sql.utils import AnalysisException
 
 access = get_config('AWS', 'S3_ACCESS')
