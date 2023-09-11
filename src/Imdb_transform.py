@@ -43,7 +43,7 @@ def transform_imdb(json_str):
                     else:
                         pass
 
-                    period_tuple = (year, award_Name, award_Category, award_Winner, award_Image)
+                    period_tuple = (year, festa_name, award_Name, award_Category, award_Winner, award_Image)
                     final_data.append(period_tuple)
                 else :
                     pass
@@ -54,7 +54,7 @@ def transform_imdb(json_str):
 raw_imdb_rdd = spark.sparkContext.parallelize([festa_data])
 transformed_rdd = raw_imdb_rdd.map(transform_imdb)
 tmp_rdd = transformed_rdd.collect()[0]
-rdd_rows = [Row(year=row[0] ,award_name=row[1], award_category=row[2],award_winner=row[3], award_image=row[4]) for row in tmp_rdd]
+rdd_rows = [Row(year=row[0], festa_name=row[1], award_name=row[2], award_category=row[3],award_winner=row[4], award_image=row[5]) for row in tmp_rdd]
 
 festa_df = spark.createDataFrame(rdd_rows)
 csv_path = f's3a://sms-warehouse/imdb/{festa_name}/{year}'
