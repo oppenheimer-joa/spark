@@ -25,9 +25,6 @@ year = date[:4]
 
 def get_spotify_data(year, movie_id):
 
-#    s3_path = f's3a://sms-basket/spotify/{year}/*{movie_id}*.json'
-#    data = spark.read.json(s3_path)
-
     try:
         s3_path = f's3a://sms-basket/spotify/{year}/*{movie_id}*.json'
         file_list = spark.sparkContext.wholeTextFiles(s3_path)
@@ -40,7 +37,7 @@ def get_spotify_data(year, movie_id):
         print(str(e))
         return movie_id, ""
 
-
+# TMDB detail 에서 오늘 날짜 영화 목록 가져오기
 def get_movie_id(date) :  # date = YYYY-MM-DD
 
     file_list = spark.sparkContext.wholeTextFiles(f"s3a://sms-basket/TMDB/detail/{date}/*.json")
@@ -66,10 +63,13 @@ def transform_spotify_json(movie_id, json_data) :
     rdd_list.append({'movie_id': movie_id, 'album': musics})
 
 
-movie_id_list = get_movie_id(date)
+# 실행
 
-for movie in movie_id_list :
-    print(movie)
+movie_id_list = get_movie_id(date)
+todo = len(movie_id_list)
+
+for now, movie in enumerate(movie_id_list) :
+    print(f"... {now} / {todo} ... {movie}")
     movie_id, raw_data = get_spotify_data(year=year, movie_id=movie)
     if raw_data != "" :
         transform_spotify_json(movie_id, raw_data)
@@ -81,3 +81,9 @@ raw_rdd = spark.sparkContext.parallelize([rdd_list])
 json_df = spark.read.json(raw_rdd)
 json_df.show()
 
+# s3_path = f's3a://sms-warehouse/spotify'
+# raw_rdd.saveAsTextFile(f"{s3_path}/{date}")
+
+json_df.write.parquet(f's3a://sms-warehouse/spotify/{date}')
+
+spark.stop()
