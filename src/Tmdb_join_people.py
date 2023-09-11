@@ -19,7 +19,7 @@ sc = SparkContext(conf=spark_conf)
 
 spark = SparkSession(sc)
 
-sys.argv[1]
+date = sys.argv[1]
 
 
 #이번주temp 전처리 people_data df 읽어오기
