@@ -2,7 +2,7 @@ import json, sys
 sys.path.append('/home/ubuntu/sms/test')
 from lib.modules import *
 from pyspark.sql import SparkSession
-from xml_to_dict import XMLtoDict
+import xmltodict
 
 # Spark Session Build
 
@@ -31,7 +31,7 @@ def get_raw_data(date):
     # xml -> dictionary -> JSON 형식의 문자열 변환
     for row in file_list.collect(): # collect() : 튜플들이 로컬 컴퓨터의 메모리로 수집
         xml_string = row[1] # 파일 내용 가져오기
-        parsing_info=XMLtoDict().parse(xml_string)['dbs']['db']
+        parsing_info=xmltodict.parse(xml_string)['dbs']['db']
         parsing_json=json.dumps(parsing_info, ensure_ascii=False, indent=2, separators=(',', ': '))
         parsing_list.append(parsing_json)
 
@@ -41,28 +41,22 @@ def get_raw_data(date):
 def transform_json(json_str):
     data = json.loads(json_str)
 
-    try :
-        tksite_temp = data.get('tksites').get('tksite')
+    # 전처리 전 "styurls" 및 "tksites" 값 가져오기, 없을 경우 [] 
+    styurls = data.get('styurls', [])['styurl']
+    tksites = data.get('tksites', [])['tksite']
 
-        if type(tksite_temp) == type([]):
-            tksite_pro=[{tksite['#text']:tksite['@href']} for tksite in tksite_temp]
-        else:
-            tksite_pro=[{tksite_temp['#text']:tksite_temp['@href']}]
+    # "styurls" 필드를 배열로 변환
+    if not isinstance(styurls, list):
+        styurls = [styurls]
 
-    except:
-        tksite_pro=[]
+    # "tksites" 필드를 배열로 변환
+    if not isinstance(tksites, list):
+        tksites = [tksites]
 
-    try:
-        styurl = list(data.get('styurls').values())
+    tksite_dict = [{site['#text']:site['@href']} for site in tksites]
 
-        if type(styurl[0]) == type([]) :
-            styurl=sum(styurl,[])
-
-    except :
-        styurl=[]
-
-    data['styurls'] = styurl
-    data['tksites'] = str(tksite_pro)
+    data['styurls'] = styurls
+    data['tksites'] = str(tksite_dict)
 
     return json.dumps(data)
 
