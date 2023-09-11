@@ -40,7 +40,7 @@ def transform_TMDB_detail_json(json_data):
         genre_ids = [genre["id"] for genre in genres]
         data["genres"] = genre_ids
 
-        return data
+        return json.dumps(data)
     except json.JSONDecodeError as e:
         return (f"json decode err : {e}")
 
