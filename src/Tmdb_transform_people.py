@@ -15,7 +15,7 @@ spark = SparkSession.builder \
     .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
     .getOrCreate()
 
-date = sys.argv[2]
+date = sys.argv[1]
 
 s3_files = spark.sparkContext.wholeTextFiles(f's3a://sms-basket/TMDB/people/{date}')
 
@@ -29,7 +29,7 @@ def transform_TMDB_people_json(json_data):
         people_death = data.get("deathday", "")
         people_name = data.get("name", "")
         people_role = data.get("known_for_department", "")
-        return (people_id, date_gte, people_name, people_role, people_img, people_birth, people_death)
+        return (people_id, date, people_name, people_role, people_img, people_birth, people_death)
     except json.JSONDecodeError as e:
         return (f"json decode err: {e}")
 
@@ -40,5 +40,5 @@ people_df = spark.createDataFrame(transformed_people_rdd, ["id", "date_gte", "na
 # S3에 parquet 데이터 저장
 s3_path = f's3a://sms-warehouse/temp/people'
 filename = f'people_{date}'
+people_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}')
 
-people_df.write.parquet(f'{s3_path}/{filename}')
