@@ -25,10 +25,10 @@ s3_whole_path = "s3a://sms-warehouse/imdb/all"
 df = spark.read.option("header", "true").parquet(s3_path + "/*/*/*/*.parquet")
 
 # 데이터프레임 출력
-df.show()
+# df.show()
 
 # 데이터프레임 저장
-df.coalesce(1).write.mode("overwrite").format("parquet").option("header","true").save(s3_whole_path)
+df.coalesce(1).write.mode("overwrite").format("parquet").save(s3_whole_path)
 
 # SparkSession 종료
 spark.stop()
