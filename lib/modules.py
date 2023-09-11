@@ -3,8 +3,8 @@ import configparser, boto3, json
 def get_config(group, req_var):
     config = configparser.ConfigParser()
     # EC2 SPARK MASTER 인스턴스 경로
-    config.read('/home/ubuntu/sms/test/config/config.ini')
-    #config.read('/Users/jesse/Documents/sms/spark/config/config.ini')
+    #config.read('/home/ubuntu/sms/test/config/config.ini')
+    config.read('/Users/jesse/Documents/sms/spark/config/config.ini')
     result = config.get(group, req_var)
     return result
 

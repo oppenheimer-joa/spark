@@ -1,5 +1,5 @@
 import json, sys
-#sys.path.append('/home/ubuntu/sms/test')
+sys.path.append('/home/ubuntu/sms/test')
 from lib.modules import *
 from pyspark.sql import SparkSession
 
@@ -15,40 +15,26 @@ spark = SparkSession.builder \
     .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
     .getOrCreate()
 
-date = '1960-01-22'
-code = '999606'
+date = sys.argv[2]
 
-# Airflow 에서 받을 파라미터
-#date = sys.argv[1]
-#code = sys.argv[2]
-category = 'people'
+s3_files = spark.sparkContext.wholeTextFiles(f's3a://sms-basket/TMDB/people/{date}')
 
-people_path = make_tmdb_file_dir(category, date, code)
-people_data = get_TMDB_data(people_path)
-
-raw_people_rdd = spark.sparkContext.parallelize([people_data])
-
-#people 전처리 함수
+# people 전처리 과정
 def transform_TMDB_people_json(json_data):
     try:
-        result = []
         data = json.loads(json_data)
-        people_name = data.get("name","")
-        people_role = data.get("known_for_department","")
-        result.append((people_name, people_role))
-        return result
+        people_name = data.get("name", "")
+        people_role = data.get("known_for_department", "")
+        return (people_name, people_role, date)
     except json.JSONDecodeError as e:
-        return (f"json decode err : {e}")
+        return (f"json decode err: {e}")
 
+transformed_people_rdd = s3_files.values().map(transform_TMDB_people_json)
 
-transformed_people_rdd = raw_people_rdd.map(transform_TMDB_people_json)
+people_df = spark.createDataFrame(transformed_people_rdd, ["name", "known_for_department", "date_gte"])
 
-transformed_people_rdd.foreach(print)
+# S3에 parquet 데이터 저장
+s3_path = f's3a://sms-warehouse/TMDB/people'
+filename = f'people_{date}'
 
-'''
-# S3에 rdd 데이터 transformed__rdd 저장
-
-s3_path = f's3a://sms-warehouse/temp'
-filename = f'similar_{date}_{movie_code}'
-transformed_similar_rdd.saveAsTextFile(f"{s3_path}/{filename}")
-'''
+people_df.write.parquet(f'{s3_path}/{filename}')
