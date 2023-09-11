@@ -59,7 +59,7 @@ rdd_rows = [Row(year=row[0], festa_name=row[1], award_name=row[2], award_categor
 festa_df = spark.createDataFrame(rdd_rows)
 parquet_path = f's3a://sms-warehouse/imdb/transformed-data/{festa_name}/{year}'
 filename = f'imdb_{festa_name}_{year}'
-festa_df.coalesce(1).write.format("parquet").save(f'{parquet_path}/{filename}')
+festa_df.coalesce(1).write.format("parquet").option("header","true").save(f'{parquet_path}/{filename}')
 '''
 # s3 저장 경로
 csv_path = f's3a://sms-warehouse/imdb/{festa_name}/{year}'
