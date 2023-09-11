@@ -18,17 +18,17 @@ spark = SparkSession.builder \
 
 
 # s3 경로 설정
-s3_path = "s3a://sms-warehouse/imdb"
-s3_tmp_path = "s3a://sms-warehouse/tmp/all"
+s3_path = "s3a://sms-warehouse/imdb/transformed-data"
+s3_whole_path = "s3a://sms-warehouse/imdb/all"
 
 # s3 path하위에 있는 모든 폴더에 존재하는 모든 csv파일을 하나의 데이터프레임으로 읽기
-df = spark.read.option("header", "true").csv(s3_path + "/*/*/*/*.csv")
+df = spark.read.option("header", "true").parquet(s3_path + "/*/*/*/*.parquet")
 
 # 데이터프레임 출력
 df.show()
 
 # 데이터프레임 저장
-df.coalesce(1).write.mode("overwrite").format("com.databricks.spark.csv").option("header","true").save(s3_tmp_path)
+df.coalesce(1).write.mode("overwrite").format("parquet").option("header","true").save(s3_whole_path)
 
 # SparkSession 종료
 spark.stop()
