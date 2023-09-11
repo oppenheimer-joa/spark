@@ -42,7 +42,7 @@ try:
 
 except AnalysisException as e:
     s3_append_dir = f"s3a://sms-warehouse/temp/people/people_{date}"
-    append_df spark.read.parquet(s3_append_dir)
+    append_df = spark.read.parquet(s3_append_dir)
     append_df = df.withColumn("date_gte", to_date(df["date_gte"], "yyyy-MM-dd"))
     append_df = df.withColumn("year", year(base_df["date_gte"]))
 
