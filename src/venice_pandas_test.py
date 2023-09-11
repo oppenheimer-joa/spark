@@ -50,15 +50,15 @@ def process_imdb_venice1(json_str): #1961~1968 & 1980~2015
     return final_data
     # print(final_data)
 
-year = "1968"
+year = "2022"
 imdb_data = s3_file_to_json(f"IMDb/imdb_venice_{year}.json")
 data = process_imdb_venice1(imdb_data)
 
 # 딕셔너리를 DataFrame으로 변환합니다.
 df = pd.DataFrame(data)
 print(df)
-csv_file_path = f"/Users/woorek/Downloads/rdd/venice_{year}.csv"
-df.to_csv(csv_file_path, header=True, index=False)
+# csv_file_path = f"/Users/woorek/Downloads/rdd/venice_{year}.csv"
+# df.to_csv(csv_file_path, header=True, index=False)
 
 end_time = time.process_time()
 elapsed_time = end_time - start_time
