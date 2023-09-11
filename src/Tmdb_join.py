@@ -32,19 +32,19 @@ for category in categories:
 	locals()[df_var] = convert_df_temp_data(rdd_data)
 
 # 동적할당된 변수 다 불러다가 join
-'''
+
 result_df = credit_df.join(image_df, on='id', how='inner')\
     .join(detail_df, on='id', how='inner')\
     .join(similar_df, on='id', how='inner')
 
 result_df.show()
-'''
 
+'''
 image_df.show()
 similar_df.show()
 detail_df.show()
 credit_df.show()
-
+'''
 
 
 
