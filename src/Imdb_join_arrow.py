@@ -9,11 +9,8 @@ import pyarrow.fs as fs
 access = get_config('AWS', 'S3_ACCESS')
 secret = get_config('AWS', 'S3_SECRET')
 
-# S3 파일시스템 설정
-s3_fs = fs.S3FileSystem(access_key=access, secret_key=secret)
-# Arrow 파일 시스템 설정
-parrow_filesystem = fs._to_filesystem(s3_fs)
-
+s3 = create_s3client()
+file_system = pa.fs.S3FileSystem(client=s3)
 
 # Spark session 초기화
 spark = SparkSession.builder \
@@ -39,7 +36,7 @@ pandas_df = df.toPandas()
 table = pa.Table.from_pandas(pandas_df)
 # 데이터를 저장할 때 디렉토리 구조를 반영하여 객체 키를 설정
 partitioned_s3_whole_path_arrow = s3_whole_path_arrow + pandas_df['festa_name'] + '/'
-pq.write_to_dataset(table, root_path=partitioned_s3_whole_path_arrow, partition_cols=['festa_name'], compression='snappy', use_dictionary=True, filesystem=parrow_filesystem)
+pq.write_to_dataset(table, root_path=partitioned_s3_whole_path_arrow, partition_cols=['festa_name'], compression='snappy', use_dictionary=True, filesystem=file_system)
 
 # SparkSession 종료
 spark.stop()
