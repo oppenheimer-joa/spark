@@ -1,4 +1,4 @@
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, Row
 import json
 import sys
 from modules import *
@@ -19,71 +19,67 @@ spark = SparkSession.builder \
 
 print("spark session built successfully")
 
-rdd_list = []
+# Airflow 로부터 받는 변수
 date = sys.argv[1]
-year = date[:4]
 
-def get_spotify_data(year, movie_id):
+raw_list = []
+rdd_list = []
 
-    try:
-        s3_path = f's3a://sms-basket/spotify/{year}/*{movie_id}*.json'
-        file_list = spark.sparkContext.wholeTextFiles(s3_path)
-        row = file_list.collect()[0]
-        json_string=row[1]
-        return movie_id, json_string
-    
-    except Exception as e:
-        print(s3_path, "<<<<< Not found >>>>>")
-        print(str(e))
-        return movie_id, ""
+# date 폴더 내 모든 json 파일 읽어오기
+def get_raw_json(date):
 
-# TMDB detail 에서 오늘 날짜 영화 목록 가져오기
-def get_movie_id(date) :  # date = YYYY-MM-DD
-
-    file_list = spark.sparkContext.wholeTextFiles(f"s3a://sms-basket/TMDB/detail/{date}/*.json")
-    movie_id_list = [row[0].split("_")[2] for row in file_list.collect()]
-
-    #return movie_id_list
-    return movie_id_list
+    s3_path = f's3a://sms-basket/spotify/{date}/*.json'
+    file_list = spark.sparkContext.wholeTextFiles(s3_path)
+    for file in file_list.collect() :
+        movie_id = file[0].split("_")[1]
+        contents = json.dumps(json.loads(file[1])['albums'])
+        raw_list.append((movie_id, contents))
+    return raw_list
 
 
-def transform_spotify_json(movie_id, json_data) :
+# ['albums']['items'] 내 3개 추출
+# movie_id  |  album1  | album2  |  album 3
+# album{i} = [ name, external_urls['spotify'], images[0]['url'] ] 
 
-    json_data = json.loads(json_data)
+def transform_spotify_json(movie_id, albums) :
+
+    json_data = json.loads(albums)
     data = json_data['albums']['items']
     musics = []
 
     for item in data :
         name = item['name']
-        artist = item['artists'][0]['name']
         url = item['external_urls']['spotify']
         image = item['images'][0]['url']
-        musics.append([name, artist, url, image])
+        musics.append([name, url, image])
 
     rdd_list.append({'movie_id': movie_id, 'album': musics})
+    return rdd_list
 
 
-# 실행
+get_raw_json(date)
+for row in raw_list :
+    print(row)
 
-movie_id_list = get_movie_id(date)
-todo = len(movie_id_list)
-
-for now, movie in enumerate(movie_id_list) :
-    print(f"... {now} / {todo} ... {movie}")
-    movie_id, raw_data = get_spotify_data(year=year, movie_id=movie)
-    if raw_data != "" :
-        transform_spotify_json(movie_id, raw_data)
-    else :
-         rdd_list.append({'movie_id': movie_id, 'album': []})
-
-raw_rdd = spark.sparkContext.parallelize([rdd_list])
-
-json_df = spark.read.json(raw_rdd)
+rdd = spark.sparkContext.parallelize([raw_list])
+json_df = spark.read.json(rdd)
 json_df.show()
 
-# s3_path = f's3a://sms-warehouse/spotify'
-# raw_rdd.saveAsTextFile(f"{s3_path}/{date}")
+# 각 요소를 Row 객체로 변환하여 컬럼 이름을 지정한 RDD 생성
+raw_rdd = rdd.map(lambda item: Row(movie_id=item['movie_id'], albums=item['albums']))
 
-json_df.write.parquet(f's3a://sms-warehouse/spotify/{date}')
+df = spark.read.json(raw_rdd)
+df.show()
+
+
+# trans_rdd = raw_rdd.map(transform_spotify_json)
+# trans_df = spark.read.json(trans_rdd)
+# trans_df.show()
+
+
+# # s3_path = f's3a://sms-warehouse/spotify'
+# # raw_rdd.saveAsTextFile(f"{s3_path}/{date}")
+
+# json_df.write.parquet(f's3a://sms-warehouse/spotify/{date}')
 
 spark.stop()
