@@ -26,7 +26,7 @@ filtered_files = s3_path.filter(lambda filter_data: date.replace('-', '') in fil
 
 # 읽은 json 파일 dataframe으로 전부다 합치기 지역코드 추가해야함
 
-def transform_boxOffice_data(json_data):
+def transform_boxOffice_data(file_name, json_data):
     try:
         data = json.loads(json_data)
         result = []
@@ -46,7 +46,7 @@ def transform_boxOffice_data(json_data):
             audi_acc = daily_boxOffice[i]["audiAcc"]
             scrn_cnt = daily_boxOffice[i]["scrnCnt"]
             show_cnt = daily_boxOffice[i]["showCnt"]
-            result.append((rank, movie_name, movie_open, sales_amount, sales_share, sales_inten, sales_change,\
+            result.append((file_name, date, rank, movie_name, movie_open, sales_amount, sales_share, sales_inten, sales_change,\
                 sales_acc, audi_cnt, audi_inten, audi_change, audi_acc, scrn_cnt, show_cnt))
         return result
     except json.JSONDecodeError as e:
@@ -56,7 +56,7 @@ def transform_boxOffice_data(json_data):
 # 만들어진 df를 temp에 떨어뜨려야함
 
 #tmp = filtered_files.values().map(transform_boxOffice_data)
-tmp = s3_path.values().map(transform_boxOffice_data)
+tmp = filtered_files.flatMap(lambda datas : transform_boxOffice_data(datas[0], datas[1]))
 print(type(tmp))
 a = tmp.collect()
 print(a)
