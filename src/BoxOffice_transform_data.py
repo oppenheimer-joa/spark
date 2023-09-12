@@ -30,6 +30,7 @@ def transform_boxOffice_data(json_data):
     try:
         data = json.loads(json_data)
         result = data.get("boxOfficeResult", {}).get("dailyBoxOfficeList", [])
+        print(type(result))
         print(result)
         return result
     except json.JSONDecodeError as e:
@@ -39,4 +40,4 @@ def transform_boxOffice_data(json_data):
 # 만들어진 df를 temp에 떨어뜨려야함
 
 tmp = filtered_files.values().map(transform_boxOffice_data)
-tmp.collect().foreach(print)
+print(type(tmp))
