@@ -2,8 +2,7 @@ import json, sys
 sys.path.append('/home/ubuntu/sms/test')
 from lib.modules import *
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, lit
-from pyspark.sql.types import IntegerType, StructType, StructField, StringType
+from pyspark.sql import Row
 
 
 access = get_config('AWS', 'S3_ACCESS')
@@ -29,7 +28,8 @@ filtered_files = s3_path.filter(lambda filter_data: date.replace('-', '') in fil
 
 def transform_boxOffice_data(json_data):
     try:
-        data = json.loads(json_data)
+        data = json_data.get("boxOfficeResult", {}).get("dailyBoxOfficeList", [])
+        data.foreach(print)
         return data
     except json.JSONDecodeError as e:
         return (f"json decode err : {e}")
@@ -38,4 +38,4 @@ def transform_boxOffice_data(json_data):
 # 만들어진 df를 temp에 떨어뜨려야함
 
 tmp = filtered_files.values().map(transform_boxOffice_data)
-tmp.foreach(print)
+tmp.collect().foreach(print)
