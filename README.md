@@ -9,6 +9,7 @@
 - TMDB[movieSimilar, movieDetails, movieCredits, movieImages] 전처리 데이터 JOIN
 - TMDB peopleDetails 전처리 데이터 JOIN (feat.Partition by date.gte("YYYY")
 
+
 ## FileTree
 구조는 아래와 같습니다.
 ```
