@@ -28,9 +28,10 @@ filtered_files = s3_path.filter(lambda filter_data: date.replace('-', '') in fil
 
 def transform_boxOffice_data(json_data):
     try:
-        data = json_data.get("boxOfficeResult", {}).get("dailyBoxOfficeList", [])
-        data.foreach(print)
-        return data
+        data = json.loads(json_data)
+        result = data.get("boxOfficeResult", {}).get("dailyBoxOfficeList", [])
+        print(result)
+        return result
     except json.JSONDecodeError as e:
         return (f"json decode err : {e}")
 
