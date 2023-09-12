@@ -31,9 +31,25 @@ s3_path = spark.sparkContext.wholeTextFiles(f"s3a://sms-basket/kobis/20230731_01
 def transform_boxOffice_data(json_data):
     try:
         data = json.loads(json_data)
-        print(json_data)
-        print(data)
-        result = data.get("boxOfficeResult", {}).get("dailyBoxOfficeList", [])
+        result = []
+        daily_boxOffice = data.get("boxOfficeResult", {}).get("dailyBoxOfficeList", [])
+        for i in range(len(daily_boxOffice)):
+            rank = daily_boxOffice[i]["rank"]
+            movie_name = daily_boxOffice[i]["movieNm"]
+            movie_open = daily_boxOffice[i]["openDt"]
+            sales_amount = daily_boxOffice[i]["salesAmt"]
+            sales_share = daily_boxOffice[i]["salesShare"]
+            sales_inten = daily_boxOffice[i]["salesInten"]
+            sales_change = daily_boxOffice[i]["salesChange"]
+            sales_acc = daily_boxOffice[i]["salesAcc"]
+            audi_cnt = daily_boxOffice[i]["audiCnt"]
+            audi_inten = daily_boxOffice[i]["audiInten"]
+            audi_change = daily_boxOffice[i]["audiChange"]
+            audi_acc = daily_boxOffice[i]["audiAcc"]
+            scrn_cnt = daily_boxOffice[i]["scrnCnt"]
+            show_cnt = daily_boxOffice[i]["showCnt"]
+            result.append((rank, movie_name, movie_open, sales_amount, sales_share, sales_inten, sales_change,\
+                sales_acc, audi_cnt, audi_inten, audi_change, audi_acc, scrn_cnt, show_cnt))
         return result
     except json.JSONDecodeError as e:
         return (f"json decode err : {e}")
