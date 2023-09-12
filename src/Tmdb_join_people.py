@@ -31,16 +31,17 @@ try:
     base_data_dir = "s3a://sms-warehouse/TMDB/people_info"
     base_df = spark.read.parquet(base_data_dir)
 
-    # 두 df 합치기
-    base_df = base_df.union(append_df)
-
     # date_gte string -> date
     base_df = base_df.withColumn("date_gte", to_date(base_df["date_gte"], "yyyy-MM-dd"))
 
     # 합친 df를 date_gte 기반 yyyy로만 파티셔닝하여 parquet으로 저장
     base_df = base_df.withColumn("year", year(base_df["date_gte"]))
-    base_df.show()
-    base_df.write.mode("overwrite").partitionBy("year").parquet("s3a://sms-warehouse/TMDB/people_info")
+
+    # 두 df 합치기
+    result_df = base_df.union(append_df)
+
+    result_df.show()
+    result_df.write.mode("overwrite").partitionBy("year").parquet("s3a://sms-warehouse/TMDB/people_info")
 
 except AnalysisException as e:
     s3_append_dir = f"s3a://sms-warehouse/temp/people/people_{date}"
