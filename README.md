@@ -15,10 +15,45 @@
 ```
 .
 ├── README.md
+├── bak
+│   ├── BoxOffice._test.py
+│   ├── Imdb_academy.py
+│   ├── Imdb_busan.py
+│   ├── Imdb_cannes.py
+│   ├── Imdb_transform_cannes.py
+│   ├── Imdb_venice.py
+│   ├── TMDB_split_movieCode.py
+│   ├── Tmdb_split_rdd.py
+│   ├── imdb_transform_academy_final.py
+│   ├── imdb_transform_venice_final.py
+│   ├── rdd_kopis_boto3.py
+│   ├── test.py
+│   ├── test_imdb.py
+│   └── venice_pandas_test.py
 ├── config
-│   └── __init__.py
-├── lib
-│   └── __init__.py
+│   └── config.ini
+│   └── modules.py
+├── sh
+│   ├── boxoffice_pyspark.sh
+│   ├── imdb_join_arrow_pyspark.sh
+│   ├── imdb_join_parquet_pyspark.sh
+│   ├── imdb_pyspark.sh
+│   ├── kopis_pyspark.sh
+│   ├── tmdb_join_pyspark.sh
+│   ├── tmdb_people_join_pyspark.sh
+│   ├── tmdb_people_pyspark.sh
+│   └── tmdb_pyspark.sh
 └── src
-    └── __init__.py
+    ├── Boxoffice_transform_data.py
+    ├── Imdb_join_arrow.py
+    ├── Imdb_join_parquet.py
+    ├── Imdb_transform.py
+    ├── Kopis_transform_data.py
+    ├── Tmdb_join.py
+    ├── Tmdb_join_people.py
+    ├── Tmdb_transform_credit.py
+    ├── Tmdb_transform_details.py
+    ├── Tmdb_transform_images.py
+    ├── Tmdb_transform_people.py
+    └── Tmdb_transform_similar.py
 ```
