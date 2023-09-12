@@ -2,8 +2,6 @@ import json, sys
 sys.path.append('/home/ubuntu/sms/test')
 from lib.modules import *
 from pyspark.sql import SparkSession
-from pyspark.sql import Row
-
 
 access = get_config('AWS', 'S3_ACCESS')
 secret = get_config('AWS', 'S3_SECRET')
@@ -18,7 +16,7 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 #date_foramt : yyyy-mm-dd
-date = '2023-07-31'
+date = sys.argv[1]
 
 # 박스오피스 wholeText로 다 가져오고, 거기서 앞에 날짜를 기반으로 해당 json만 읽어오기
 s3_path = spark.sparkContext.wholeTextFiles(f"s3a://sms-basket/kobis/{date.split('-')[0]}")
@@ -59,11 +57,15 @@ def transform_boxOffice_data(file_name, json_data):
 #tmp = filtered_files.values().map(transform_boxOffice_data)
 box_office_rdd = filtered_files.flatMap(lambda datas : transform_boxOffice_data(datas[0], datas[1]))
 
-result_df = spark.createDataFrame(box_office_rdd, ["loc_code", "rank", "movie_nm", "movie_open",\
+result_df = spark.createDataFrame(box_office_rdd, ["loc_code","date", "rank", "movie_nm", "movie_open",\
     "sales_amount", "sales_share", "sales_inten", "sales_change", "sales_acc", \
-    "audi_cnt", "audi_change", "audi_acc", "scrn_cnt", "show_cnt"])
+    "audi_cnt", "audi_inten", "audi_change", "audi_acc", "scrn_cnt", "show_cnt"])
 
-result_df.show()
+s3_path = f's3a://sms-warehouse/temp/kobis'
+filename = f'boxOffice_{date}'
+people_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}')
+
+
 
 
 
