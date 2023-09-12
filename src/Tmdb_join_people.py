@@ -39,6 +39,8 @@ try:
 
     # 합친 df를 date_gte 기반 yyyy로만 파티셔닝하여 parquet으로 저장
     base_df = base_df.withColumn("year", year(base_df["date_gte"]))
+
+    base_df.show()
     base_df.write.mode("overwrite").partitionBy("year").parquet("s3a://sms-warehouse/TMDB/people_info")
 
 except AnalysisException as e:
