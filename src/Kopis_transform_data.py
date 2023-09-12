@@ -40,20 +40,24 @@ def get_raw_data(date):
 # 데이터 전처리
 def transform_json(json_str):
     data = json.loads(json_str)
+    print(data)
+    # 전처리 전 "styurls" 및 "tksites" 값 가져오기, 없을 경우 []
+    styurls = data.get('styurls', [])
+    tksites = data.get('tksites', [])
 
-    # 전처리 전 "styurls" 및 "tksites" 값 가져오기, 없을 경우 [] 
-    styurls = data.get('styurls', [])['styurl']
-    tksites = data.get('tksites', [])['tksite']
+    if styurls != [] :
+        styurls = styurls['styurl']
+        # "styurls" 필드를 배열로 변환
+        if not isinstance(styurls, list):
+            styurls = [styurls]
 
-    # "styurls" 필드를 배열로 변환
-    if not isinstance(styurls, list):
-        styurls = [styurls]
+    if tksites != [] :
+        tksites = tksites['tksite']
+        # "tksites" 필드를 배열로 변환
+        if not isinstance(tksites, list):
+            tksites = [tksites]
 
-    # "tksites" 필드를 배열로 변환
-    if not isinstance(tksites, list):
-        tksites = [tksites]
-
-    tksite_dict = [{site['#text']:site['@href']} for site in tksites]
+        tksite_dict = [{site['#text']:site['@href']} for site in tksites]
 
     data['styurls'] = styurls
     data['tksites'] = str(tksite_dict)
@@ -77,7 +81,8 @@ def spark_job_kopis(date):
 
     # 데이터 프레임을 Parquet 파일로 저장
     output_path = f'sms-warehouse/kopis/{year}/KOPIS_{date}'
-    json_df.write.partitionBy('genrenm').parquet(f"s3a://{output_path}")
+    json_df.write.parquet(f"s3a://{output_path}")
+    # json_df.write.partitionBy('genrenm').parquet(f"s3a://{output_path}")
 
 # Execute
 date = sys.argv[1]
