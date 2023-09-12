@@ -34,7 +34,6 @@ def transform_boxOffice_data(json_data):
         print(json_data)
         print(data)
         result = data.get("boxOfficeResult", {}).get("dailyBoxOfficeList", [])
-
         return result
     except json.JSONDecodeError as e:
         return (f"json decode err : {e}")
@@ -44,7 +43,9 @@ def transform_boxOffice_data(json_data):
 
 #tmp = filtered_files.values().map(transform_boxOffice_data)
 tmp = s3_path.values().map(transform_boxOffice_data)
-
+print(type(tmp))
+a = tmp.collect()
+print(a)
 
 
 
