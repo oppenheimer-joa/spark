@@ -32,6 +32,7 @@ def transform_boxOffice_data(file_name, json_data):
         result = []
         daily_boxOffice = data.get("boxOfficeResult", {}).get("dailyBoxOfficeList", [])
         for i in range(len(daily_boxOffice)):
+            location_code = file_name.split('/')[5].split('_')[1]
             rank = daily_boxOffice[i]["rank"]
             movie_name = daily_boxOffice[i]["movieNm"]
             movie_open = daily_boxOffice[i]["openDt"]
@@ -46,7 +47,7 @@ def transform_boxOffice_data(file_name, json_data):
             audi_acc = daily_boxOffice[i]["audiAcc"]
             scrn_cnt = daily_boxOffice[i]["scrnCnt"]
             show_cnt = daily_boxOffice[i]["showCnt"]
-            result.append((file_name, date, rank, movie_name, movie_open, sales_amount, sales_share, sales_inten, sales_change,\
+            result.append((location_code, date, rank, movie_name, movie_open, sales_amount, sales_share, sales_inten, sales_change,\
                 sales_acc, audi_cnt, audi_inten, audi_change, audi_acc, scrn_cnt, show_cnt))
         return result
     except json.JSONDecodeError as e:
@@ -56,10 +57,14 @@ def transform_boxOffice_data(file_name, json_data):
 # 만들어진 df를 temp에 떨어뜨려야함
 
 #tmp = filtered_files.values().map(transform_boxOffice_data)
-tmp = filtered_files.flatMap(lambda datas : transform_boxOffice_data(datas[0], datas[1]))
-print(type(tmp))
-a = tmp.collect()
-print(a)
+box_office_rdd = filtered_files.flatMap(lambda datas : transform_boxOffice_data(datas[0], datas[1]))
+
+result_df = spark.createDataFrame(box_office_rdd, ["loc_code", "rank", "movie_nm", "movie_open",\
+    "sales_amount", "sales_share", "sales_inten", "sales_change", "sales_acc", \
+    "audi_cnt", "audi_change", "audi_acc", "scrn_cnt", "show_cnt"])
+
+result_df.show()
+
 
 
 
