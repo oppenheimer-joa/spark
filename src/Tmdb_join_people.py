@@ -29,7 +29,7 @@ try:
 
     # 기존 합칠 데이터 append_df 불러오기
     base_data_dir = "s3a://sms-warehouse/TMDB/people_info"
-    base_df = spark.read.parquet(base_data_dir)
+    base_df = spark.read.parquet(base_data_dir).cache()
 
     # date_gte string -> date
     base_df = base_df.withColumn("date_gte", to_date(base_df["date_gte"], "yyyy-MM-dd"))
