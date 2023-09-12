@@ -23,15 +23,15 @@ date = '2023-07-31'
 # 박스오피스 wholeText로 다 가져오고, 거기서 앞에 날짜를 기반으로 해당 json만 읽어오기
 s3_path = spark.sparkContext.wholeTextFiles(f"s3a://sms-basket/kobis/{date.split('-')[0]}")
 filtered_files = s3_path.filter(lambda filter_data: date.replace('-', '') in filter_data[0])
-
+a = filtered_file.collect()
+print(a)
 # 읽은 json 파일 dataframe으로 전부다 합치기 지역코드 추가해야함
 
 def transform_boxOffice_data(json_data):
     try:
         data = json.loads(json_data)
         result = data.get("boxOfficeResult", {}).get("dailyBoxOfficeList", [])
-        print(type(result))
-        print(result)
+
         return result
     except json.JSONDecodeError as e:
         return (f"json decode err : {e}")
@@ -40,4 +40,3 @@ def transform_boxOffice_data(json_data):
 # 만들어진 df를 temp에 떨어뜨려야함
 
 tmp = filtered_files.values().map(transform_boxOffice_data)
-print(type(tmp))
