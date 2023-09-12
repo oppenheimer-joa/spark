@@ -62,6 +62,7 @@ def transform_json(json_str):
 
 # spark job
 def spark_job_kopis(date):
+    year = date.split('-')[0]
 
     file_list = get_raw_data(date)
 
@@ -71,11 +72,12 @@ def spark_job_kopis(date):
 
     # 변환된 JSON 데이터 출력
     json_df = spark.read.json(transformed_rdd)
+    json_df = json_df.drop('prfstate')
     json_df.show()
 
     # 데이터 프레임을 Parquet 파일로 저장
-    output_path = f'sms-warehouse/kopis/KOPIS_{date}'
-    json_df.write.parquet(f"s3a://{output_path}")
+    output_path = f'sms-warehouse/kopis/{year}/KOPIS_{date}'
+    json_df.write.partitionBy('genrenm').parquet(f"s3a://{output_path}")
 
 # Execute
 date = sys.argv[1]
