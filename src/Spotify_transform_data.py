@@ -39,8 +39,6 @@ def get_raw_json(date):
 
 # ['albums']['items'] 내 3개 추출
 # movie_id  |  album1  | album2  |  album 3
-# album{i} = [ name, external_urls['spotify'], images[0]['url'] ]
-
 
 # raw json 에서 필요 컬럼 추출 
 def transform_spotify_json(raw_data):
@@ -51,8 +49,9 @@ def transform_spotify_json(raw_data):
     transform_json = {}
 
     for idx, item in enumerate(items):
-        name = item.get('name', '') # 앨범 이름
-        artists = item.get('artists', '') # 아티스트 이름
+        item_dict=None
+        name = item.get('name', '') # 앨범명
+        artists = item.get('artists', [{}])[0].get('name','') # 아티스트명
         url = item.get('external_urls', {}).get('spotify', '') # spotify url
         image = item.get('images', [{}])[0].get('url', '') # 앨범 이미지 url
 
@@ -62,10 +61,6 @@ def transform_spotify_json(raw_data):
 
     del data['contents']
     data.update(transform_json) # movie_id  |  album1  | album2  |  album 3
-
-    #data['contents']=str(proc_item_dict)
-    #data['contents']=proc_item_dict
-    #results.append({'movieCode': movieCode, 'albums': proc_item_dict})
 
     return json.dumps(data)
 
