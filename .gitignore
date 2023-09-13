@@ -3,5 +3,3 @@ __pycache__/
 **/__pycache__/
 config/config.ini
 **/.DS_Store
-data/
-Pipfile
