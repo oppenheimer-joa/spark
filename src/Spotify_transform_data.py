@@ -66,7 +66,6 @@ def transform_spotify_json(raw_data):
 
 # spark job
 def spark_job_spotify(date):
-    year=date.split('-')[0]
     file_list=get_raw_json(date)
     raw_rdd = spark.sparkContext.parallelize(file_list)
     transformed_rdd = raw_rdd.map(transform_spotify_json)
@@ -75,7 +74,7 @@ def spark_job_spotify(date):
     json_df.show()
 
     # 데이터 프레임을 Parquet 파일로 저장
-    output_path = f'sms-warehouse/spotify/{year}/{date}'
+    output_path = f'sms-warehouse/spotify/{date}'
     # json_df.write.parquet(f"s3a://{output_path}")
     json_df.write.mode("overwrite").parquet(f"s3a://{output_path}")
 

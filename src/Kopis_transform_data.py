@@ -90,7 +90,7 @@ def spark_job_kopis(date):
     # 데이터 프레임을 Parquet 파일로 저장
     output_path = f'sms-warehouse/kopis/{year}/{date}'
     # json_df.write.parquet(f"s3a://{output_path}")
-    json_df.write.partitionBy('genrenm').mode("overwrite").parquet(f"s3a://{output_path}")
+    json_df.write.partitionBy('genreCode').mode("overwrite").parquet(f"s3a://{output_path}")
 
 # Execute
 date = sys.argv[1]
