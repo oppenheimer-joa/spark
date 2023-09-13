@@ -63,8 +63,8 @@ def transform_json(json_str):
         # "tksites" 필드를 배열로 변환
         if not isinstance(tksites, list):
             tksites = [tksites]
-
-        tksite_dict = [{site['#text']:site['@href']} for site in tksites]
+        if tksites:
+            tksite_dict = [{site.get('#text',''):site.get('@href','')} for site in tksites]
     
     data['styurls'] = styurls
     data['tksites'] = str(tksite_dict)
