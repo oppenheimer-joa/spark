@@ -55,7 +55,7 @@ genre_df.show()
 
 s3_path = f's3a://sms-warehouse/genre/{date}'
 filename = f'TMDB_movie_{movie_code}_{date}'
-append_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}'
+genre_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}'
 
 
 
