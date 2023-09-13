@@ -46,16 +46,16 @@ desired_genres = {
 }
 
 for genre, genre_code in desired_genres.items():
-    genrd_df = genre_df.withColumn(genre, when(col("genres").cast("string").contains(str(genre_code)), 1).otherwise(0))
+    genre_df = genre_df.withColumn(genre, when(col("genres").cast("string").contains(str(genre_code)), 1).otherwise(0))
 
-genre_df = genre_df.genre_df.withColumn("id", lit(movie_code))
+genre_df = genre_df.withColumn("id", lit(movie_code))
 genre_df = genre_df.drop("genres")
 
 genre_df.show() 
 
 s3_path = f's3a://sms-warehouse/genre/{date}'
 filename = f'TMDB_movie_{movie_code}_{date}'
-genre_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}'
+genre_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}')
 
 
 
