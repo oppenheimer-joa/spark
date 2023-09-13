@@ -40,10 +40,16 @@ def transform_TMDB_similar_json(json_data):
 
         results = data.get("results", [])
         similar_ids = []
-        for i in range(5):
-            similar_ids.append(results[i]["id"])
-        data["results"] = similar_ids
-        data["id"] = int(movie_code)
+
+        if len(results) != 0:
+            for i in range(5):
+                similar_ids.append(results[i]["id"])
+            data["results"] = similar_ids
+            data["id"] = int(movie_code)
+        else :
+            data["results"] = similar_ids
+            data["id"] = int(movie_code)
+
         return data
 
     except json.JSONDecodeError as e:
