@@ -2,7 +2,8 @@ import subprocess
 
 def run_imdb_pyspark(year:str, festa_name:str):
 	spark_submit_cmd = [
-				"/home/ubuntu/spark/spark-3.2.4/bin/spark-submit",
+				# "/home/ubuntu/spark/spark-3.2.4/bin/spark-submit",
+				"/home/spark/spark/spark-3.2.4/bin/spark-submit",
 				"--master",
 				"spark://master:7077",
 				"/home/ubuntu/sms/test/src/Imdb_transform.py",
