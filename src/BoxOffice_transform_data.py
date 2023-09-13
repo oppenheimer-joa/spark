@@ -63,7 +63,7 @@ result_df = spark.createDataFrame(box_office_rdd, ["loc_code","date", "rank", "m
 
 s3_path = f's3a://sms-warehouse/temp/kobis'
 filename = f'boxOffice_{date}'
-people_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}')
+result_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}')
 
 
 
