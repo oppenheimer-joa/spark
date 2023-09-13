@@ -50,20 +50,22 @@ def transform_json(json_str):
     styurls = data.get('styurls', [])
     tksites = data.get('tksites', [])
 
-    if styurls != [] :
-        styurls = styurls['styurl']
+    tksite_dict=None
+
+    if styurls :
+        styurls = styurls.get('styurl',[])
         # "styurls" 필드를 배열로 변환
         if not isinstance(styurls, list):
             styurls = [styurls]
 
-    if tksites != [] :
-        tksites = tksites['tksite']
+    if tksites:
+        tksites = tksites.get('tksite',[])
         # "tksites" 필드를 배열로 변환
         if not isinstance(tksites, list):
             tksites = [tksites]
 
         tksite_dict = [{site['#text']:site['@href']} for site in tksites]
-
+    
     data['styurls'] = styurls
     data['tksites'] = str(tksite_dict)
 
