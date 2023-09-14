@@ -6,6 +6,9 @@ def run_imdb_pyspark(year:str, festa_name:str):
 				"/home/spark/spark/spark-3.2.4/bin/spark-submit",
 				"--master",
 				"spark://master:7077",
+				"--total-executor-cores", "10",  # 전체 클러스터에서 사용할 총 코어 수
+				"--executor-cores", "2",  # 각 Executor당 사용할 코어 수
+				"--executor-memory", "2g", # 각 Executor당 할당할 메모리 크기
 				"/home/ubuntu/sms/test/src/Imdb_transform.py",
 				year,
 				festa_name
