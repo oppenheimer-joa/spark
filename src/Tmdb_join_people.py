@@ -10,7 +10,7 @@ access = get_config('AWS', 'S3_ACCESS')
 secret = get_config('AWS', 'S3_SECRET')
 
 # Spark configuration 설정
-spark_conf = SparkConf().setAppName("UnionDatas") \
+spark_conf = SparkConf().setAppName("UnionPeopleDatas") \
     .set("spark.hadoop.fs.s3a.access.key", access) \
     .set("spark.hadoop.fs.s3a.secret.key", secret) \
     .set("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
