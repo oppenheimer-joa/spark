@@ -51,7 +51,8 @@ def transform_TMDB_similar_json(json_data):
         similar_ids = []
 
         if len(results) != 0:
-            for i in range(5):
+            k=min(len(results),5)
+            for i in range(k):
                 similar_ids.append(results[i]["id"])
             data["results"] = similar_ids
             data["id"] = int(movie_code)
