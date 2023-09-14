@@ -10,7 +10,7 @@ def get_config(group, req_var):
     result = config.get(group, req_var)
     return result
 
-def run_tmdb_people_command(date_gte, script_path):
+def run_tmdb_people_command(date_gte):
     command = ["sh", "/home/spark/spark_code/sh/tmdb_people_pyspark.sh", date_gte]
     try:
         subprocess.run(command, check=True)
@@ -36,7 +36,7 @@ while start_datetime.year < 2023:
 
     for i in range(2):
         date_gte = date_gte_list[i]
-        thread = threading.Thread(target=run_tmdb_command, args=(date_gte))
+        thread = threading.Thread(target=run_tmdb_people_command, args=(date_gte,))
         threads.append(thread)
         if len(threads) >= num_threads:
             for thread in threads:
