@@ -8,7 +8,7 @@ secret = get_config('AWS', 'S3_SECRET')
 
 # Spark session 초기화
 spark = SparkSession.builder \
-    .appName("TmdbJsonToImageRdd") \
+    .appName("TmdbJsonToImageDataFrame") \
     .config("spark.hadoop.fs.s3a.access.key", access) \
     .config("spark.hadoop.fs.s3a.secret.key", secret) \
     .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \

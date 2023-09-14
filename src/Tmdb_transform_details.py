@@ -42,21 +42,12 @@ def transform_TMDB_detail_json(json_data):
 
 transformed_detail_rdd = s3_files.values().map(transform_TMDB_detail_json)
 
-data_df = spark.read.json(transformed_detail_rdd)
+detail_df = spark.read.json(transformed_detail_rdd)
 
-data_df.show()
-
-# SparkSession을 종료합니다.
-spark.stop()
-
-'''
-image_df = spark.createDataFrame(transformed_image_rdd, ["id", "posters"])
-
-# S3에 rdd 데이터 transformed__rdd 저장
 s3_path = f's3a://sms-warehouse/temp'
-filename = f'image_{date}'
-image_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}')
-'''
+filename = f'detail_{date}'
+detail_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}')
+
 
 
 
