@@ -42,7 +42,7 @@ def transform_TMDB_detail_json(json_data):
 
 transformed_detail_rdd = s3_files.values().map(transform_TMDB_detail_json)
 
-data_df = spark.createDataFrame(transformed_detail_rdd)
+data_df = spark.read.json(transformed_detail_rdd)
 
 data_df.show()
 
