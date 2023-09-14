@@ -1,5 +1,5 @@
 import json, sys
-sys.path.append('/home/ubuntu/sms/test')
+sys.path.append('/home/spark/spark_code')
 from lib.modules import *
 from pyspark.sql import SparkSession
 
