@@ -41,8 +41,14 @@ def transform_TMDB_detail_json(json_data):
         return (f"json decode err : {e}")
 
 transformed_detail_rdd = s3_files.values().map(transform_TMDB_detail_json)
-a = transform_TMDB_detail_json.collect()
-print(a)
+
+data_df = spark.createDataFrame(transformed_detail_rdd)
+
+data_df.show()
+
+# SparkSession을 종료합니다.
+spark.stop()
+
 '''
 image_df = spark.createDataFrame(transformed_image_rdd, ["id", "posters"])
 
@@ -52,6 +58,5 @@ filename = f'image_{date}'
 image_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}')
 '''
 
-spark.stop()
 
 
