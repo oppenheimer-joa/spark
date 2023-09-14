@@ -55,4 +55,9 @@ while start_datetime.year < 2001:
                 thread.join()
             threads = []
 
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
 
