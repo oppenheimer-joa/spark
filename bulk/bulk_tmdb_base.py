@@ -17,7 +17,7 @@ def run_tmdb_command(date_gte, script_path):
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {command}")
 
-start_date = '2000-01-07'
+start_date = '1960-01-01'
 start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
 
 # 병렬로 실행할 명령 스크립트 경로
@@ -35,7 +35,7 @@ script_paths = [
 # 스레드 수
 num_threads = 8
 
-while start_datetime.year < 2001:
+while start_datetime.year < 2000:
 
     date_gte_list =[]
 
