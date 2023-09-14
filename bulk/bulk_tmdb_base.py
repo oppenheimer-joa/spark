@@ -25,6 +25,10 @@ script_paths = [
     "/home/spark/spark_code/src/Tmdb_transform_details.py",
     "/home/spark/spark_code/src/Tmdb_transform_credit.py",
     "/home/spark/spark_code/src/Tmdb_transform_images.py",
+    "/home/spark/spark_code/src/Tmdb_transform_similar.py",
+    "/home/spark/spark_code/src/Tmdb_transform_details.py",
+    "/home/spark/spark_code/src/Tmdb_transform_credit.py",
+    "/home/spark/spark_code/src/Tmdb_transform_images.py",
     "/home/spark/spark_code/src/Tmdb_transform_similar.py"
 ]
 
