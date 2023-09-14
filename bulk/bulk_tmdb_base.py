@@ -25,6 +25,10 @@ script_paths = [
     "/home/spark/spark_code/src/Tmdb_transform_details.py",
     "/home/spark/spark_code/src/Tmdb_transform_credit.py",
     "/home/spark/spark_code/src/Tmdb_transform_images.py",
+    "/home/spark/spark_code/src/Tmdb_transform_similar.py",
+    "/home/spark/spark_code/src/Tmdb_transform_details.py",
+    "/home/spark/spark_code/src/Tmdb_transform_credit.py",
+    "/home/spark/spark_code/src/Tmdb_transform_images.py",
     "/home/spark/spark_code/src/Tmdb_transform_similar.py"
 ]
 
@@ -54,5 +58,10 @@ while start_datetime.year < 2001:
             for thread in threads:
                 thread.join()
             threads = []
+
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
 
 
