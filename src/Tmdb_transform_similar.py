@@ -16,21 +16,19 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 
-def get_TMDB_data_similar(file_key):
-    if file_key == "wrong":
-        return "wrong_category"
-    else:
-        raw_list=[]
-        s3_path = f's3a://sms-basket/{file_key}'
-        file_list = spark.sparkContext.wholeTextFiles(s3_path)
+def get_TMDB_data_similar(category,date):
+    raw_list=[]
 
-        for file in file_list.collect():
-            movieCode = file[0].split("_")[2]  # 파일명에서 movieCode 추출
-            contents=json.loads(file[1])
-            new_json={'movieCode':movieCode,'contents':contents}
-            raw_list.append(json.dumps(new_json))
+    s3_path = f's3a://sms-basket/TMDB/{category}/{date}/*.json'
+    file_list = spark.sparkContext.wholeTextFiles(s3_path)
 
-        return raw_list
+    for file in file_list.collect():
+        movieCode = file[0].split("_")[2]  # 파일명에서 movieCode 추출
+        contents=json.loads(file[1])
+        new_json={'movieCode':movieCode,'contents':contents}
+        raw_list.append(json.dumps(new_json))
+
+    return raw_list
     
 
 #similar 전처리 함수
@@ -67,13 +65,11 @@ def transform_TMDB_similar_json(json_data):
 
 
 # date = '1960-01-01'
-# movie_code = '1000336'
 # Airflow 에서 받을 파라미터
+
 date = sys.argv[1]
 category = 'similar'
-
-similar_path = make_tmdb_file_dir(category, date)
-similar_data = get_TMDB_data_similar(similar_path)
+similar_data = get_TMDB_data_similar(category,date)
 raw_similar_rdd = spark.sparkContext.parallelize(similar_data)
 transformed_similar_rdd = raw_similar_rdd.map(transform_TMDB_similar_json)
 json_df = spark.read.json(transformed_similar_rdd)

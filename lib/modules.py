@@ -18,22 +18,6 @@ def create_s3client():
 
     return s3
 
-
-#TMDB_peopleDetails_999606_1960-01-22.json
-def make_tmdb_file_dir(category, date):
-    if category == "detail":
-        return f'TMDB/{category}/{date}/*.json'
-    elif category == "credit":
-        return f'TMDB/{category}/{date}/*.json'
-    elif category == "similar":
-        return f'TMDB/{category}/{date}/*.json'
-    elif category == "image":
-        return f'TMDB/{category}/{date}/*.json'
-    elif category == "people":
-    	return f"TMDB/{category}/{date}/*.json"
-    else:
-        return "wrong"
-
 def get_TMDB_data(file_key):
     if file_key == "wrong":
         return "wrong_category"
