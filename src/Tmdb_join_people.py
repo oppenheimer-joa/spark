@@ -1,5 +1,5 @@
 import json, sys
-sys.path.append('/home/ubuntu/sms/test')
+sys.path.append('/home/spark/spark_code')
 from lib.modules import *
 from pyspark.sql import SparkSession
 from pyspark import SparkConf, SparkContext
@@ -10,7 +10,7 @@ access = get_config('AWS', 'S3_ACCESS')
 secret = get_config('AWS', 'S3_SECRET')
 
 # Spark configuration 설정
-spark_conf = SparkConf().setAppName("UnionDatas") \
+spark_conf = SparkConf().setAppName("UnionPeopleDatas") \
     .set("spark.hadoop.fs.s3a.access.key", access) \
     .set("spark.hadoop.fs.s3a.secret.key", secret) \
     .set("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \

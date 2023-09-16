@@ -1,7 +1,8 @@
 import json, sys
-sys.path.append('/home/ubuntu/sms/test')
+sys.path.append('/home/spark/spark_code')
 from lib.modules import *
 from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, StringType
 from pyspark.sql.functions import to_date, year
 
 access = get_config('AWS', 'S3_ACCESS')
@@ -36,9 +37,17 @@ def transform_TMDB_people_json(json_data):
 
 transformed_people_rdd = s3_files.values().map(transform_TMDB_people_json)
 
-people_df = spark.createDataFrame(transformed_people_rdd, ["id", "date_gte", "name", "known_for_department", "profile_img", "birth", "death"])
-people_df = people_df.withColumn("date_gte", to_date(people_df["date_gte"], "yyyy-MM-dd"))
-people_df = people_df.withColumn("year", year(people_df["date_gte"]))
+schema = StructType([
+    StructField("id", StringType(), True),
+    StructField("date_gte", StringType(), True),
+    StructField("name", StringType(), True),
+    StructField("known_for_department", StringType(), True),
+    StructField("profile_img", StringType(), True),
+    StructField("birth", StringType(), True),
+    StructField("death", StringType(), True),
+])
+
+people_df = spark.createDataFrame(transformed_people_rdd, schema)
 
 # S3에 parquet 데이터 저장
 s3_path = f's3a://sms-warehouse/temp/people'
