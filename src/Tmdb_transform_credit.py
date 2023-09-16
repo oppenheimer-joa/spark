@@ -1,5 +1,5 @@
 import json, sys
-sys.path.append('/home/spark/spark_code')
+sys.path.append('/home/ubuntu/sms/test')
 from lib.modules import *
 from pyspark.sql import SparkSession
 
@@ -15,23 +15,17 @@ spark = SparkSession.builder \
     .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
     .getOrCreate()
 
+# date = '1960-01-01'
+# movie_code = '1000336'
+# Airflow 에서 받을 파라미터
+date = sys.argv[1]
+movie_code = sys.argv[2]
+category = 'credit'
 
+credit_path = make_tmdb_file_dir(category, date, movie_code)
+credit_data = get_TMDB_data(credit_path)
 
-def get_TMDB_data(file_key):
-    if file_key == "wrong":
-        return "wrong_category"
-    else:
-        raw_list=[]
-        s3_path = f's3a://sms-basket/{file_key}'
-        file_list = spark.sparkContext.wholeTextFiles(s3_path)
-
-        for file in file_list.collect():
-            contents=json.loads(file[1])
-            raw_list.append(json.dumps(contents))
-
-        print(raw_list)
-
-        return raw_list
+raw_credit_rdd = spark.sparkContext.parallelize([credit_data])
 
 #credit 전처리 함수
 def transform_TMDB_credit_json(json_data):
@@ -65,21 +59,9 @@ def transform_TMDB_credit_json(json_data):
         return f"wrong code :  {e}"
 
 
-# date = '1960-01-01'
-# Airflow 에서 받을 파라미터
+transformed_credit_rdd = raw_credit_rdd.map(transform_TMDB_credit_json)
 
-date = sys.argv[1]
-category = 'credit'
-
-s3_files = spark.sparkContext.wholeTextFiles(f's3a://sms-basket/TMDB/{category}/{date}')
-transformed_credit_rdd = s3_files.values().map(transform_TMDB_credit_json)
-json_df = spark.read.json(transformed_credit_rdd)
-# json_df.show()
-
-#데이터 프레임을 Parquet 파일로 저장
+# S3에 rdd 데이터 transformed__rdd 저장
 s3_path = f's3a://sms-warehouse/temp'
-filename = f'credit_{date}'
-
-json_df.write.parquet(f"{s3_path}/{filename}")
-
-
+filename = f'credit_{date}_{movie_code}'
+transformed_credit_rdd.saveAsTextFile(f"{s3_path}/{filename}")
