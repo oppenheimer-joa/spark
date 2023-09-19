@@ -40,23 +40,24 @@ v0.9.0/
 │   └── modules.py
 ├── sh
 │   ├── boxoffice_pyspark.sh
-│   ├── imdb_join_arrow_pyspark.sh
 │   ├── imdb_join_parquet_pyspark.sh
-│   ├── imdb_pyspark.sh
+│   ├── imdb_transform_pyspark.sh
 │   ├── join_boxOffice.sh
 │   ├── kopis_pyspark.sh
+│   ├── spotify_pyspark.sh
+│   ├── tmdb_genre_pyspark.sh
 │   ├── tmdb_join_pyspark.sh
 │   ├── tmdb_people_join_pyspark.sh
 │   ├── tmdb_people_pyspark.sh
 │   ├── tmdb_pyspark.sh
-│   └── transform_boxOffice.sh
 └── src
     ├── BoxOffice_join_data.py
     ├── BoxOffice_transform_data.py
-    ├── Imdb_join_arrow.py
     ├── Imdb_join_parquet.py
     ├── Imdb_transform.py
     ├── Kopis_transform_data.py
+    ├── Spotify_transform_data.py
+    ├── Tmdb_extract_genres.py
     ├── Tmdb_join.py
     ├── Tmdb_join_people.py
     ├── Tmdb_transform_credit.py
