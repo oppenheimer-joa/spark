@@ -15,6 +15,7 @@ spark = SparkSession.builder \
     .config("spark.hadoop.fs.s3a.secret.key", secret) \
     .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
     .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
+    .config('spark.sql.sources.partitionColumnTypeInference.enabled', 'false') \
     .getOrCreate()
 
 date = sys.argv[1]
@@ -32,17 +33,19 @@ try:
     base_data_dir = f"s3a://sms-warehouse/kobis/{year}/boxOffice_{month}"
 
     base_df = spark.read.parquet(base_data_dir).cache()
-
+    base_df = base_df.select("loc_code","date", "rank", "movie_nm", "movie_open","sales_amount",
+                            "sales_share", "sales_inten", "sales_change", "sales_acc", "audi_cnt", 
+                            "audi_inten", "audi_change", "audi_acc", "scrn_cnt", "show_cnt")
+    append_df = append_df.select("loc_code","date", "rank", "movie_nm", "movie_open","sales_amount",
+                                "sales_share", "sales_inten", "sales_change", "sales_acc", "audi_cnt", 
+                                "audi_inten", "audi_change", "audi_acc", "scrn_cnt", "show_cnt")
     #데이터 병합
     result_df = base_df.union(append_df)
     print(base_df.count(), result_df.count()) 
     result_df.show()
-    result_df.write.mode("overwrite").partitionBy("loc_code").parquet(f"s3a://sms-warehouse/kobis/\
-    	{year}/boxOffice_{month}")
+    result_df.write.mode("overwrite").partitionBy("loc_code").parquet(f"s3a://sms-warehouse/kobis/{year}/boxOffice_{month}")
 
 except AnalysisException as e:
     s3_append_dir = f"s3a://sms-warehouse/temp/kobis/boxOffice_{date}"
     append_df = spark.read.parquet(s3_append_dir)
-    append_df.write.mode("overwrite").partitionBy("loc_code").\
-    parquet(f"s3a://sms-warehouse/kobis/{year}/\
-    boxOffice_{month}")
+    append_df.write.mode("overwrite").partitionBy("loc_code").parquet(f"s3a://sms-warehouse/kobis/{year}/boxOffice_{month}")
