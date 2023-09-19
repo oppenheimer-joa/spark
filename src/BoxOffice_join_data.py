@@ -49,3 +49,4 @@ except AnalysisException as e:
     s3_append_dir = f"s3a://sms-warehouse/temp/kobis/boxOffice_{date}"
     append_df = spark.read.parquet(s3_append_dir)
     append_df.write.mode("overwrite").partitionBy("loc_code").parquet(f"s3a://sms-warehouse/kobis/{year}/boxOffice_{month}")
+
