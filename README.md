@@ -8,6 +8,11 @@ v0.9.0/
 - TMDB[movieSimilar, movieDetails, movieCredits, movieImages, peopleDetails] 전처리
 - TMDB[movieSimilar, movieDetails, movieCredits, movieImages] 전처리 데이터 JOIN
 - TMDB peopleDetails 전처리 데이터 JOIN (feat.Partition by date.gte("YYYY")
+- TMDB 영화별 장르 one-hot encoding
+- KOPIS 데이터 전처리 (feat.Partition by genreCode)
+- Spotify 데이터 전처리
+- BoxOffice 데이터 전처리 (일별 집계)
+- BoxOffice 전처리 데이터 월별 JOIN (feat.Partition by loc_code)
 
 
 ## FileTree
@@ -48,7 +53,6 @@ v0.9.0/
 └── src
     ├── BoxOffice_join_data.py
     ├── BoxOffice_transform_data.py
-    ├── Boxoffice_transform_data.py
     ├── Imdb_join_arrow.py
     ├── Imdb_join_parquet.py
     ├── Imdb_transform.py
