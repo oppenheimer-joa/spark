@@ -1,5 +1,5 @@
 import json, sys
-sys.path.append('/home/ubuntu/sms/test')
+sys.path.append('/home/spark/spark_code')
 from lib.modules import *
 from pyspark.sql import SparkSession
 
@@ -15,22 +15,29 @@ spark = SparkSession.builder \
     .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
     .getOrCreate()
 
-# date = '1960-01-01'
-# movie_code = '1000336'
-# Airflow 에서 받을 파라미터
-date = sys.argv[1]
-movie_code = sys.argv[2]
-category = 'similar'
 
-similar_path = make_tmdb_file_dir(category, date, movie_code)
-similar_data = get_TMDB_data(similar_path)
+def get_TMDB_data_similar(category,date):
+    raw_list=[]
 
-raw_similar_rdd = spark.sparkContext.parallelize([similar_data])
+    s3_path = f's3a://sms-basket/TMDB/{category}/{date}/*.json'
+    file_list = spark.sparkContext.wholeTextFiles(s3_path)
+
+    for file in file_list.collect():
+        movieCode = file[0].split("_")[2]  # 파일명에서 movieCode 추출
+        contents=json.loads(file[1])
+        new_json={'movieCode':movieCode,'contents':contents}
+        raw_list.append(json.dumps(new_json))
+
+    return raw_list
+    
 
 #similar 전처리 함수
 def transform_TMDB_similar_json(json_data):
     try:
-        data = json.loads(json_data)
+        raw = json.loads(json_data)
+        data=raw.get('contents')
+        movie_code=raw.get('movieCode')
+
         keys_to_remove = ["total_pages", "total_results", "page"]
         
         # key 삭제
@@ -40,18 +47,39 @@ def transform_TMDB_similar_json(json_data):
 
         results = data.get("results", [])
         similar_ids = []
-        for i in range(5):
-            similar_ids.append(results[i]["id"])
-        data["results"] = similar_ids
-        data["id"] = int(movie_code)
+
+        if len(results) != 0:
+            k=min(len(results),5)
+            for i in range(k):
+                similar_ids.append(results[i]["id"])
+            data["results"] = similar_ids
+            data["id"] = int(movie_code)
+        else :
+            data["results"] = similar_ids
+            data["id"] = int(movie_code)
+
         return data
 
     except json.JSONDecodeError as e:
         return f"json decode err : {e}"
 
-transformed_similar_rdd = raw_similar_rdd.map(transform_TMDB_similar_json)
 
-# S3에 rdd 데이터 transformed__rdd 저장
+# date = '1960-01-01'
+# Airflow 에서 받을 파라미터
+
+date = sys.argv[1]
+category = 'similar'
+
+similar_path = make_tmdb_file_dir(category, date)
+similar_data = get_TMDB_data_similar(similar_path)
+raw_similar_rdd = spark.sparkContext.parallelize(similar_data)
+transformed_similar_rdd = raw_similar_rdd.map(transform_TMDB_similar_json)
+json_df = spark.read.json(transformed_similar_rdd)
+# json_df.show()
+
+#데이터 프레임을 Parquet 파일로 저장
 s3_path = f's3a://sms-warehouse/temp'
-filename = f'similar_{date}_{movie_code}'
-transformed_similar_rdd.saveAsTextFile(f"{s3_path}/{filename}")
+filename = f'similar_{date}'
+json_df.write.parquet(f"{s3_path}/{filename}")
+
+

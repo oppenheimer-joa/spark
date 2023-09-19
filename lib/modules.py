@@ -3,7 +3,8 @@ import configparser, boto3, json
 def get_config(group, req_var):
     config = configparser.ConfigParser()
     # EC2 SPARK MASTER 인스턴스 경로
-    config.read('/home/ubuntu/sms/test/config/config.ini')
+    #config.read('/home/ubuntu/sms/test/config/config.ini')
+    config.read('/home/spark/spark_code/config/config.ini')
     #config.read('/Users/jesse/Documents/sms/spark/config/config.ini')
     result = config.get(group, req_var)
     return result
@@ -17,19 +18,17 @@ def create_s3client():
 
     return s3
 
-
-#TMDB_peopleDetails_999606_1960-01-22.json
-def make_tmdb_file_dir(category, date, code):
+def make_tmdb_file_dir(category, date):
     if category == "detail":
-        return f'TMDB/{category}/{date}/TMDB_movieDetails_{code}_{date}.json'
+        return f'TMDB/{category}/{date}/*.json'
     elif category == "credit":
-        return f'TMDB/{category}/{date}/TMDB_movieCredits_{code}_{date}.json'
+        return f'TMDB/{category}/{date}/*.json'
     elif category == "similar":
-        return f'TMDB/{category}/{date}/TMDB_movieSimilar_{code}_{date}.json'
+        return f'TMDB/{category}/{date}/*.json'
     elif category == "image":
-        return f'TMDB/{category}/{date}/TMDB_movieImages_{code}_{date}.json'
+        return f'TMDB/{category}/{date}/*.json'
     elif category == "people":
-    	return f"TMDB/{category}/{date}/TMDB_peopleDetails_{code}_{date}.json"
+        return f"TMDB/{category}/{date}/*.json"
     else:
         return "wrong"
 
