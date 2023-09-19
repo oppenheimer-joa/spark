@@ -1,7 +1,11 @@
 # spark
 
+## v0.9.0/rel
+
 해당 BR은 릴리즈 버전이며, 
 구현이 되어있는 기능은 아래와 같습니다.
+
+### 전체 기능
 v0.9.0
 - IMDB[academy, venice, busan, cannes] 데이터 전처리
 - IMDB 전처리 데이터 JOIN (feat.Partition by festa.name)
