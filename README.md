@@ -2,7 +2,7 @@
 
 해당 BR은 릴리즈 버전이며, 
 구현이 되어있는 기능은 아래와 같습니다.
-
+v0.9.0/
 - IMDB[academy, venice, busan, cannes] 데이터 전처리
 - IMDB 전처리 데이터 JOIN (feat.Partition by festa.name)
 - TMDB[movieSimilar, movieDetails, movieCredits, movieImages, peopleDetails] 전처리
@@ -13,7 +13,6 @@
 - Spotify 데이터 전처리
 - BoxOffice 데이터 전처리 (일별 집계)
 - BoxOffice 전처리 데이터 월별 JOIN (feat.Partition by loc_code)
-
 
 
 ## FileTree
@@ -41,22 +40,19 @@
 │   └── modules.py
 ├── sh
 │   ├── boxoffice_pyspark.sh
-│   ├── imdb_join_arrow_pyspark.sh
 │   ├── imdb_join_parquet_pyspark.sh
-│   ├── imdb_pyspark.sh
+│   ├── imdb_transform_pyspark.sh
 │   ├── join_boxOffice.sh
 │   ├── kopis_pyspark.sh
 │   ├── spotify_pyspark.sh
+│   ├── tmdb_genre_pyspark.sh
 │   ├── tmdb_join_pyspark.sh
 │   ├── tmdb_people_join_pyspark.sh
 │   ├── tmdb_people_pyspark.sh
-│   └── tmdb_pyspark.sh
-│   └── transform_boxOffice.sh
+│   ├── tmdb_pyspark.sh
 └── src
     ├── BoxOffice_join_data.py
     ├── BoxOffice_transform_data.py
-    ├── Boxoffice_transform_data.py
-    ├── Imdb_join_arrow.py
     ├── Imdb_join_parquet.py
     ├── Imdb_transform.py
     ├── Kopis_transform_data.py

@@ -1,14 +1,10 @@
-import subprocess
+import subprocess, sys
+sys.path.append('/home/spark/spark_code')
+from lib.modules import *
 import mysql.connector
-import configparser
 from datetime import datetime, timedelta
 import threading
 
-def get_config(group, req_var):
-    config = configparser.ConfigParser()
-    config.read("/home/spark/spark_code/config/config.ini")
-    result = config.get(group, req_var)
-    return result
 
 def run_tmdb_command(date_gte, script_path):
     command = ["sh", "/home/spark/spark_code/sh/tmdb_pyspark.sh", script_path, date_gte]
@@ -35,7 +31,7 @@ script_paths = [
 # 스레드 수
 num_threads = 8
 
-while start_datetime.year < 2000:
+while start_datetime.year < 2024:
 
     date_gte_list =[]
 
@@ -63,5 +59,3 @@ while start_datetime.year < 2000:
         thread.start()
     for thread in threads:
         thread.join()
-
-

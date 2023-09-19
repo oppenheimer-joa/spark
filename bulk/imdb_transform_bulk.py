@@ -31,10 +31,9 @@ festa_list = ["academy","busan","cannes","venice"]
 for festa in festa_list:
 
 	if festa == "academy":
-		pass
-		# for i in range(1961,2024):
-		# 	year = str(i)
-		# 	run_imdb_pyspark(year=year, festa_name=festa)
+		for i in range(1961,2024):
+			year = str(i)
+			run_imdb_pyspark(year=year, festa_name=festa)
 
 	elif festa == "busan":
 		for i in range(1997,2023):

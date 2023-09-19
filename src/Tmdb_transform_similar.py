@@ -69,7 +69,9 @@ def transform_TMDB_similar_json(json_data):
 
 date = sys.argv[1]
 category = 'similar'
-similar_data = get_TMDB_data_similar(category,date)
+
+similar_path = make_tmdb_file_dir(category, date)
+similar_data = get_TMDB_data_similar(similar_path)
 raw_similar_rdd = spark.sparkContext.parallelize(similar_data)
 transformed_similar_rdd = raw_similar_rdd.map(transform_TMDB_similar_json)
 json_df = spark.read.json(transformed_similar_rdd)

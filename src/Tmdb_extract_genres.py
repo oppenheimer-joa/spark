@@ -17,11 +17,10 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 date = sys.argv[1]
-movie_code = sys.argv[2]
 
-base_dir = f"s3a://sms-warehouse/TMDB/{date}/TMDB_movie_{movie_code}_{date}"
+base_dir = f"s3a://sms-warehouse/TMDB/{date}"
 base_df = spark.read.parquet(base_dir)
-genre_df = base_df.select("genres")
+genre_df = base_df.select("id","genres")
 
 desired_genres = {
     "Action": 28,
@@ -48,14 +47,14 @@ desired_genres = {
 for genre, genre_code in desired_genres.items():
     genre_df = genre_df.withColumn(genre, when(col("genres").cast("string").contains(str(genre_code)), 1).otherwise(0))
 
-genre_df = genre_df.withColumn("id", lit(movie_code))
 genre_df = genre_df.drop("genres")
 
-genre_df.show() 
+# genre_df.show() 
 
-s3_path = f's3a://sms-warehouse/genre/{date}'
-filename = f'TMDB_movie_{movie_code}_{date}'
-genre_df.write.mode("overwrite").parquet(f'{s3_path}/{filename}')
+s3_path = f's3a://sms-warehouse/TMDB_genre/{date}'
+genre_df.write.mode("overwrite").parquet(f'{s3_path}')
+
+spark.stop()
 
 
 
