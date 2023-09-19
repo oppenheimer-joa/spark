@@ -6,7 +6,7 @@
 # SPARK FILE 가져오기
 SPARK_HOME='/home/spark/spark/spark-3.2.4'
 #DATE FORMAT = yyyy-mm-dd
-DATE=$1
+DATE="$1"
 
 # Spark Job 제출
 # 각자의 spark 환경에 맞게 설정 필요

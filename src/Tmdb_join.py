@@ -38,6 +38,7 @@ result_df = credit_df.join(image_df, on='id', how='inner')\
 # s3 저장 경로 
 parquet_path = f's3a://sms-warehouse/TMDB/{date}'
 # TMDB_movie_1002185_2023-09-08
-result_df.write.parquet(f'{parquet_path}')
+result_df.write.mode("overwrite").parquet(f'{parquet_path}')
+# result_df.write.parquet(f'{parquet_path}')
 
 spark.stop()

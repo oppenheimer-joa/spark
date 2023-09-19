@@ -15,8 +15,6 @@ spark = SparkSession.builder \
     .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
     .getOrCreate()
 
-
-
 def get_TMDB_data(file_key):
     if file_key == "wrong":
         return "wrong_category"
@@ -71,8 +69,10 @@ def transform_TMDB_credit_json(json_data):
 date = sys.argv[1]
 category = 'credit'
 
-s3_files = spark.sparkContext.wholeTextFiles(f's3a://sms-basket/TMDB/{category}/{date}')
-transformed_credit_rdd = s3_files.values().map(transform_TMDB_credit_json)
+credit_path = make_tmdb_file_dir(category, date)
+credit_data=get_TMDB_data(credit_path)
+raw_credit_rdd = spark.sparkContext.parallelize(credit_data)
+transformed_credit_rdd = raw_credit_rdd.map(transform_TMDB_credit_json)
 json_df = spark.read.json(transformed_credit_rdd)
 # json_df.show()
 
@@ -81,5 +81,3 @@ s3_path = f's3a://sms-warehouse/temp'
 filename = f'credit_{date}'
 
 json_df.write.parquet(f"{s3_path}/{filename}")
-
-
